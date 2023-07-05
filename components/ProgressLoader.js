@@ -1,5 +1,5 @@
 import React from 'react';
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Image, StyleSheet, View} from 'react-native';
 import {Modal} from 'react-native-paper';
 const ProgressLoader = ({loading}) => {
   return (
@@ -11,10 +11,14 @@ const ProgressLoader = ({loading}) => {
         transparent={true}
         visible={loading}
         onRequestClose={() => {
-          setLoading(!loading);
+          // setLoading(!loading);
         }}>
         <View style={style.progressViewStyle}>
-          <ActivityIndicator size="large" color="#e06e34" />
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
+          {/* <ActivityIndicator size="large" color="#e06e34" /> */}
         </View>
       </Modal>
     </View>
@@ -30,6 +34,7 @@ const style = StyleSheet.create({
     maxHeight: 50,
     alignItems: 'center',
     elevation: 5,
+    justifyContent: 'center',
   },
 });
 export default ProgressLoader;

@@ -16,6 +16,7 @@ import {
   SafeAreaView,
   ToastAndroid,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import ButtonComponent from '../components/buttonComponent';
 import Inputcomponent from '../components/InputTypeComponent';
@@ -38,7 +39,7 @@ const LoginPage = ({navigation}) => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
     } else {
-      AlertIOS.alert(msg);
+      Alert.alert(msg);
     }
   }
 
@@ -106,7 +107,7 @@ const LoginPage = ({navigation}) => {
         AsyncStorage.setItem('isLogin', 'yes');
         setLoginResult(response.data.data);
         var token = await AsyncStorage.getItem('AuthToken');
-        console.log('token- ', loading);
+        console.log('newtoken- ', token);
         setLoading(false);
         navigation.reset({
           index: 0,
@@ -299,7 +300,10 @@ const LoginPage = ({navigation}) => {
           setLoading(!loading);
         }}>
         <View style={style.progressViewStyle}>
-          <ActivityIndicator size="large" color="#e06e34" />
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
         </View>
       </Modal>
     </SafeAreaView>
@@ -315,6 +319,7 @@ const style = StyleSheet.create({
     maxHeight: 50,
     alignItems: 'center',
     elevation: 5,
+    justifyContent: 'center',
   },
   rootStyle: {
     flex: 1,

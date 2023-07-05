@@ -1,7 +1,10 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
-import BottomSheet from 'react-native-simple-bottom-sheet';
+import React, {useContext, useMemo, useEffect, useRef, useState} from 'react';
+// import BottomSheet from 'react-native-simple-bottom-sheet';
+import {BottomSheet} from 'react-native-btr';
 import {Dropdown} from 'react-native-element-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useIsFocused} from '@react-navigation/native';
+
 import {
   View,
   Text,
@@ -10,6 +13,8 @@ import {
   TouchableOpacity,
   Image,
   Linking,
+  Platform,
+  ToastAndroid,
 } from 'react-native';
 import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
@@ -20,12 +25,17 @@ import Inputcomponent from '../components/InputTypeComponent';
 import ButtonComponent from '../components/buttonComponent';
 import HeaderComponent from '../components/HeaderComponent';
 import SideMenuComponent from '../components/SideMenuComponent';
+import {Modal} from 'react-native-paper';
+import ApiConfig from '../AppNetwork/ApiConfig';
 
 // var clickStatus = false;
 export const CallMenu = clickStatus => {};
 
-const DashboardPage = ({navigation}) => {
+const DashboardPage = props => {
+  const snapPoints = useMemo(() => ['25%'], []);
+
   const [clickStatas, setClickStatas] = useState(false);
+  const [folderId, setFolderId] = useState('');
   const [folderName, setFolderName] = useState('');
   const [searchItem, setSearchItem] = useState('');
   const [searchClick, setSearchClick] = useState(false);
@@ -34,10 +44,100 @@ const DashboardPage = ({navigation}) => {
   const panelRefDelete = useRef(null);
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
+  const [folderList, setFolderList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [authToken, setAuthToken] = useState('');
+  const [visible, setVisible] = useState(false);
+
+  const toggleBottomNavigationView = () => {
+    //Toggling the visibility state of the bottom sheet
+    setVisible(!visible);
+  };
+
+  function notifyMessage(msg) {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      AlertIOS.alert(msg);
+    }
+  }
+
+  const callCreateFolderApi = async type => {
+    console.log('CreateFolder--', type, folderId, folderName);
+    var token = await AsyncStorage.getItem('AuthToken');
+    setAuthToken(token);
+    setLoading(true);
+    try {
+      const response = await ApiConfig.post(
+        '/user-folder-crud',
+        {
+          id: folderId,
+          name: folderName,
+          type: type,
+        }, //Send Params hear
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }, //Send header config hear
+        {},
+      );
+      console.log('regtoken- ', response.data.data.message);
+      setLoading(false);
+      toggleBottomNavigationView();
+      callGetFolderListApi();
+    } catch (err) {
+      setLoading(false);
+      console.log(err.response);
+      if (String(err.message).includes('Network')) {
+        notifyMessage(err.message);
+      } else {
+        notifyMessage('Something went wrong.');
+      }
+    }
+  };
+
+  const callGetFolderListApi = async () => {
+    var token = await AsyncStorage.getItem('AuthToken');
+    setAuthToken(token);
+    setLoading(true);
+    try {
+      const response = await ApiConfig.post(
+        '/get-user-folders',
+        '', //Send Params hear
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }, //Send header config hear
+        {},
+      );
+      console.log('regtoken- ', response.data.data);
+      setFolderList(response.data.data);
+      setLoading(false);
+      console.log('name ', response.data.data[0].name);
+    } catch (err) {
+      setLoading(false);
+      console.log(err.response);
+      if (String(err.message).includes('Network')) {
+        notifyMessage(err.message);
+      } else {
+        notifyMessage('Something went wrong.');
+      }
+    }
+  };
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    console.log('called');
+    // Call only when screen open or when back on screen
+    if (isFocused) {
+      callGetFolderListApi();
+    }
+  }, [props, isFocused]);
 
   function callNew() {
     console.log('calling');
-    panelRef.current.togglePanel();
+    toggleBottomNavigationView();
     setClickStatas(false);
   }
   function callNewEdit() {
@@ -55,7 +155,7 @@ const DashboardPage = ({navigation}) => {
     // AsyncStorage.setItem('savePassword', '');
     // AsyncStorage.setItem('isRememberMe', 'no');
     AsyncStorage.setItem('isLogin', 'no');
-    navigation.reset({
+    props.navigation.reset({
       index: 0,
       routes: [{name: 'WelCome'}],
     });
@@ -91,8 +191,8 @@ const DashboardPage = ({navigation}) => {
         onSearchPressCallback={() =>
           searchClick ? setSearchClick(false) : setSearchClick(true)
         }
-        onMsgPressCallback={() => navigation.navigate('NotificationPage')}
-        onHelpPressCallback={() => navigation.navigate('HelpPage')}
+        onMsgPressCallback={() => props.navigation.navigate('NotificationPage')}
+        onHelpPressCallback={() => props.navigation.navigate('HelpPage')}
       />
 
       <LinearGradient
@@ -112,75 +212,42 @@ const DashboardPage = ({navigation}) => {
         )}
 
         <View style={{height: 50, marginTop: 10}}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View
-              style={{
-                justifyContent: 'center',
-                paddingStart: 20,
-              }}>
-              <SimpleButton
-                titleText="Active"
-                onPressCallback={() => {
-                  //   setclickedBtn('tnc'),
-                  //     setButtonColorDP('#fff'),
-                  //     setButtonColorPP('#fff'),
-                  //     setButtonColorTnC('#e06e34'),
-                  //     setButtonColorTextDP('#e06e34'),
-                  //     setButtonColorTextPP('#e06e34'),
-                  //     setButtonColorTextTnC('#fff');
-                  //   console.log('TnC : ' + clickedBtn + ' ' + buttonColorTnC);
-                }}
-                buttonWidth="100%"
-                bgColor="#fff"
-                btnTextColor="#e06e34"
-              />
-            </View>
-            <View
-              style={{
-                justifyContent: 'center',
-                paddingStart: 10,
-              }}>
-              <SimpleButton
-                titleText="Completed"
-                onPressCallback={() => {
-                  //   setclickedBtn('pp'),
-                  //     setButtonColorDP('#fff'),
-                  //     setButtonColorPP('#e06e34'),
-                  //     setButtonColorTnC('#fff'),
-                  //     setButtonColorTextDP('#e06e34'),
-                  //     setButtonColorTextPP('#fff'),
-                  //     setButtonColorTextTnC('#e06e34');
-                  //   console.log('Privacy : ' + clickedBtn);
-                }}
-                buttonWidth="100%"
-                bgColor="#fff"
-                btnTextColor="#e06e34"
-              />
-            </View>
-            <View
-              style={{
-                justifyContent: 'center',
-                paddingStart: 10,
-                paddingEnd: 20,
-              }}>
-              <SimpleButton
-                titleText="Custom"
-                onPressCallback={() => {
-                  //   setclickedBtn('dp'),
-                  //     setButtonColorDP('#e06e34'),
-                  //     setButtonColorPP('#fff'),
-                  //     setButtonColorTnC('#fff'),
-                  //     setButtonColorTextDP('#fff'),
-                  //     setButtonColorTextPP('#e06e34'),
-                  //     setButtonColorTextTnC('#e06e34');
-                  //   console.log('Data : ' + clickedBtn);
-                }}
-                buttonWidth="100%"
-                bgColor="#fff"
-                btnTextColor="#e06e34"
-              />
-            </View>
-          </ScrollView>
+          <FlatList
+            contentContainerStyle={{paddingBottom: 20}}
+            keyExtractor={folderId => folderId.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            data={folderList}
+            renderItem={({item}) => {
+              return (
+                <View
+                  style={{
+                    justifyContent: 'center',
+                    paddingStart: 20,
+                    paddingTop: 12,
+                    minWidth: 100,
+                    maxWidth: 150,
+                  }}>
+                  <SimpleButton
+                    titleText={item.name}
+                    onPressCallback={() => {
+                      //   setclickedBtn('tnc'),
+                      //     setButtonColorDP('#fff'),
+                      //     setButtonColorPP('#fff'),
+                      //     setButtonColorTnC('#e06e34'),
+                      //     setButtonColorTextDP('#e06e34'),
+                      //     setButtonColorTextPP('#e06e34'),
+                      //     setButtonColorTextTnC('#fff');
+                      //   console.log('TnC : ' + clickedBtn + ' ' + buttonColorTnC);
+                    }}
+                    buttonWidth="100%"
+                    bgColor="#fff"
+                    btnTextColor="#e06e34"
+                  />
+                </View>
+              );
+            }}
+          />
         </View>
         <FlatList
           contentContainerStyle={{paddingBottom: 20}}
@@ -190,7 +257,7 @@ const DashboardPage = ({navigation}) => {
             return (
               <CardComponent
                 onChalenjClick={() => {
-                  navigation.navigate('ChalenjDetails');
+                  props.navigation.navigate('ChalenjDetails');
                 }}
               />
             );
@@ -223,17 +290,26 @@ const DashboardPage = ({navigation}) => {
       </LinearGradient>
 
       <BottomSheet
-        wrapperStyle={{backgroundColor: '#252635'}}
-        animationDuration={50}
-        sliderMinHeight={0}
-        isOpen={false}
-        ref={ref => (panelRef.current = ref)}>
-        <View>
-          <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold'}}>
+        visible={visible}
+        //setting the visibility state of the bottom shee
+        onBackButtonPress={toggleBottomNavigationView}
+        //Toggling the visibility state on the click of the back botton
+        onBackdropPress={toggleBottomNavigationView}>
+        <View style={styles.bottomNavigationView}>
+          <Text
+            style={{
+              alignSelf: 'flex-start',
+              color: 'black',
+              fontSize: 15,
+              fontWeight: 'bold',
+              marginTop: 20,
+              marginStart: 10,
+            }}>
             Create Folder
           </Text>
-          <View style={{marginTop: 20}}>
+          <View style={{width: '100%', marginTop: 20}}>
             <Inputcomponent
+              style={{height: 60}}
               hideInput={false}
               placeHolderText="Enter folder name"
               inputValue={folderName}
@@ -255,7 +331,7 @@ const DashboardPage = ({navigation}) => {
                 textColor="#ffffff"
                 title="Cancle"
                 showIcon={false}
-                onPressCallback={() => panelRef.current.togglePanel()}
+                onPressCallback={() => toggleBottomNavigationView()}
               />
             </View>
             <View style={{flex: 1, marginStart: 5}}>
@@ -265,7 +341,7 @@ const DashboardPage = ({navigation}) => {
                 textColor="#ffffff"
                 title="OK"
                 showIcon={false}
-                onPressCallback={() => console.log('Pressed')}
+                onPressCallback={() => callCreateFolderApi('create')}
               />
             </View>
           </View>
@@ -430,11 +506,47 @@ const DashboardPage = ({navigation}) => {
           </View>
         </View>
       </BottomSheet>
+      {/* For progressbar pop up */}
+      <Modal
+        style={{alignItems: 'center'}}
+        animationType="slide"
+        transparent={true}
+        visible={loading}
+        onRequestClose={() => {
+          setLoading(!loading);
+        }}>
+        <View style={styles.progressViewStyle}>
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  bottomNavigationView: {
+    backgroundColor: '#fff',
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopEndRadius: 20,
+    borderTopStartRadius: 20,
+    paddingHorizontal: 20,
+  },
+  progressViewStyle: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    width: 50,
+    maxHeight: 50,
+    alignItems: 'center',
+    elevation: 5,
+    justifyContent: 'center',
+  },
   HeaderStyle: {
     height: 80,
     backgroundColor: '#252635',

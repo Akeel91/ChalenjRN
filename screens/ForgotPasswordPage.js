@@ -9,15 +9,79 @@ import {
   ScrollView,
   Button,
   SafeAreaView,
+  ActivityIndicator,
+  Platform,
+  ToastAndroid,
 } from 'react-native';
 import ButtonComponent from '../components/buttonComponent';
 import Inputcomponent from '../components/InputTypeComponent';
+import {Modal} from 'react-native-paper';
+import ApiConfig from '../AppNetwork/ApiConfig';
 
 const ForgorPasswordPage = ({navigation}) => {
   const [emailId, setEmailId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [authToken, setAuthToken] = useState('');
+
+  function notifyMessage(msg) {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      AlertIOS.alert(msg);
+    }
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${authToken}`,
+  };
+  const validateEmail = text => {
+    console.log(text);
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    if (reg.test(text) === false) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+  const callForgotPassApi = async () => {
+    console.log('Params - ', emailId);
+    if (emailId == '') {
+      notifyMessage('Please enter your email Id');
+    } else if (validateEmail(emailId) == false) {
+      notifyMessage('Please enter a valid email id');
+    } else {
+      setLoading(true);
+      try {
+        const response = await ApiConfig.post(
+          '/auth/forgot-password',
+          headers,
+          {
+            params: {
+              email: emailId,
+            },
+          },
+        );
+        notifyMessage('We have sent mail over this email, ' + emailId);
+        setLoading(false);
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Login'}],
+        });
+      } catch (err) {
+        setLoading(false);
+        console.log(err.message);
+        if (String(err.message).includes('Network')) {
+          notifyMessage(err.message);
+        } else {
+          notifyMessage('Something went wrong Please check your email id.');
+        }
+      }
+    }
+  };
 
   return (
-    <SafeAreaView style={style.container}>
+    <SafeAreaView style={{flex: 1}}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={{backgroundColor: '#232739'}}>
@@ -69,7 +133,7 @@ const ForgorPasswordPage = ({navigation}) => {
                 textColor="#ffffff"
                 title="SEND RESET LINK"
                 showIcon={false}
-                onPressCallback={() => console.log('Pressed')}
+                onPressCallback={() => callForgotPassApi()}
               />
             </View>
             <View
@@ -102,11 +166,37 @@ const ForgorPasswordPage = ({navigation}) => {
           </View>
         </View>
       </ScrollView>
+      {/* For progressbar pop up */}
+      <Modal
+        style={{alignItems: 'center'}}
+        animationType="slide"
+        transparent={true}
+        visible={loading}
+        onRequestClose={() => {
+          setLoading(!loading);
+        }}>
+        <View style={style.progressViewStyle}>
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const style = StyleSheet.create({
+  progressViewStyle: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    width: 50,
+    maxHeight: 50,
+    alignItems: 'center',
+    elevation: 5,
+    justifyContent: 'center',
+  },
   rootStyle: {
     flex: 1,
     backgroundColor: '#232739',

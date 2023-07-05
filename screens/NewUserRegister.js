@@ -244,7 +244,10 @@ const NewUserRegisterPage = ({navigation}) => {
           setLoading(!loading);
         }}>
         <View style={style.progressViewStyle}>
-          <ActivityIndicator size="large" color="#e06e34" />
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
         </View>
       </Modal>
     </SafeAreaView>
@@ -260,6 +263,7 @@ const style = StyleSheet.create({
     maxHeight: 50,
     alignItems: 'center',
     elevation: 5,
+    justifyContent: 'center',
   },
 
   rootStyle: {

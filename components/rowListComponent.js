@@ -2,23 +2,59 @@ import React from 'react';
 import {Card} from 'react-native-paper';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 
-const ListComponent = ({imageTop, title, onPressCallback}) => {
-  console.log(imageTop);
+const ListComponent = ({
+  childStatus,
+  instStep,
+  type,
+  imageTop,
+  title,
+  onPressCallback,
+}) => {
+  console.log(type);
   return (
     <View style={{flex: 1}}>
-      <TouchableOpacity
-        activeOpacity={0.6}
-        onPress={() => console.log('Press')}>
+      <TouchableOpacity activeOpacity={0.6} onPress={() => onPressCallback()}>
         <View style={style.cardStyle}>
           <View
             style={{
               paddingHorizontal: 15,
               flexDirection: 'row',
             }}>
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={{width: 60, height: 60, alignSelf: 'center'}}
-            />
+            <View style={{flexDirection: 'column'}}>
+              {type == 'instlistchalenj' ? (
+                <Text
+                  style={{
+                    alignSelf: 'center',
+                    color: 'black',
+                    fontSize: 10,
+                    marginBottom: 4,
+                  }}>
+                  STEP {instStep}
+                </Text>
+              ) : null}
+              <Image
+                source={imageTop}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 50,
+                  alignSelf: 'center',
+                  resizeMode: 'stretch',
+                }}
+              />
+              {type == 'instlistchalenj' && childStatus == true ? (
+                <Image
+                  source={require('../assets/icons/dots.png')}
+                  style={{
+                    width: 20,
+                    height: 20,
+                    alignSelf: 'center',
+                    resizeMode: 'stretch',
+                  }}
+                />
+              ) : null}
+            </View>
+
             <View style={{alignSelf: 'center', marginStart: 15, flex: 1}}>
               <Text
                 style={{
@@ -26,16 +62,18 @@ const ListComponent = ({imageTop, title, onPressCallback}) => {
                   fontSize: 16,
                   fontWeight: 'bold',
                 }}>
-                Title
+                {title}
               </Text>
-              <Text
-                style={{
-                  color: '#808080',
-                  fontWeight: 600,
-                  fontSize: 14,
-                }}>
-                Description
-              </Text>
+              {type == 'listchalenj' || 'instlistchalenj' ? null : (
+                <Text
+                  style={{
+                    color: '#808080',
+                    fontWeight: 600,
+                    fontSize: 14,
+                  }}>
+                  Description
+                </Text>
+              )}
             </View>
           </View>
         </View>
@@ -50,7 +88,7 @@ const style = StyleSheet.create({
     height: 90,
     borderRadius: 7,
     backgroundColor: '#d8ebfa',
-    marginTop: 20,
+    marginTop: 10,
     alignSelf: 'center',
     elevation: 4,
     justifyContent: 'center',

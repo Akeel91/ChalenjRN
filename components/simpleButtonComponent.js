@@ -24,6 +24,7 @@ const SimpleButton = ({
         onPress={() => onPressCallback()}>
         <Text
           style={{
+            textTransform: 'uppercase',
             fontSize: 12,
             fontWeight: 'bold',
             color: btnTextColor,

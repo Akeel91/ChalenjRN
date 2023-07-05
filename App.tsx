@@ -4,6 +4,7 @@ import 'react-native-gesture-handler';
 import StackNavigator from './components/RootNavigator';
 import { Provider } from 'react-redux';
 import { store } from './Redux/store';
+// import 'react-native-gesture-handler'
 
 const App = () => {
   return (
