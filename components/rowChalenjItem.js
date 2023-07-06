@@ -1,10 +1,21 @@
 import React from 'react';
 import {View, StyleSheet, Image, TouchableOpacity, Text} from 'react-native';
-const ChalenjItem = ({onChalenjOpenClick}) => {
+import moment from 'moment';
+const ChalenjItem = ({
+  taskDay,
+  instStep,
+  type,
+  title,
+  imageTop,
+  bgColor,
+  onPressCallback,
+}) => {
+  console.log('taskday--', taskDay);
+  moment.locale();
   return (
     // This view is using to show the Instruction and list type chalenj's
 
-    <TouchableOpacity onPress={() => onChalenjOpenClick()}>
+    <TouchableOpacity onPress={() => onPressCallback()}>
       <View
         style={{
           flexDirection: 'row',
@@ -32,84 +43,87 @@ const ChalenjItem = ({onChalenjOpenClick}) => {
       This view is using to show the Date specific type chalenj's 
       */}
 
-        {/* <View
-        style={{
-          justifyContent: 'center',
-          height: 70,
-          borderTopLeftRadius: 10,
-          borderBottomLeftRadius: 10,
-          backgroundColor: '#e06e34',
-          padding: 12,
-        }}>
-        <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>
-          30
-        </Text>
-        <Text
-          style={{
-            fontSize: 13,
-            color: 'white',
-            alignSelf: 'center',
-          }}>
-          Mar
-        </Text>
-      </View> */}
-
-        <View
-          style={{
-            justifyContent: 'center',
-            height: 70,
-            borderTopLeftRadius: 10,
-            borderBottomLeftRadius: 10,
-            backgroundColor: '#573310', // will be dynamic just static for now
-            padding: 12,
-          }}>
+        {type == 'dateSpef' ? (
           <View
             style={{
-              borderWidth: 1,
-              borderColor: 'white',
               justifyContent: 'center',
-              alignSelf: 'center',
-              height: 30,
-              width: 30,
-              borderRadius: 5,
+              height: 70,
+              borderTopLeftRadius: 10,
+              borderBottomLeftRadius: 10,
+              backgroundColor: bgColor,
+              padding: 12,
             }}>
+            <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>
+              {moment(taskDay).format('DD')}
+            </Text>
             <Text
               style={{
                 fontSize: 13,
-                fontWeight: 'bold',
                 color: 'white',
                 alignSelf: 'center',
               }}>
-              1
+              {moment(taskDay).format('MMM')}
             </Text>
           </View>
-        </View>
+        ) : (
+          <View
+            style={{
+              justifyContent: 'center',
+              height: 70,
+              borderTopLeftRadius: 10,
+              borderBottomLeftRadius: 10,
+              backgroundColor: '#573310', // will be dynamic just static for now
+              padding: 12,
+            }}>
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: 'white',
+                justifyContent: 'center',
+                alignSelf: 'center',
+                height: 30,
+                width: 30,
+                borderRadius: 5,
+                backgroundColor: '#573310',
+              }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  alignSelf: 'center',
+                }}>
+                {instStep}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* 
       This view is using to show the Ref. type chalenj's 
       */}
 
         {/* <View
-        style={{
-          justifyContent: 'center',
-          height: 70,
-          borderTopLeftRadius: 10,
-          borderBottomLeftRadius: 10,
-          backgroundColor: '#e06e34',
-          padding: 12,
-        }}>
-        <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>
-          30
-        </Text>
-        <Text
           style={{
-            fontSize: 13,
-            color: 'white',
-            alignSelf: 'center',
+            justifyContent: 'center',
+            height: 70,
+            borderTopLeftRadius: 10,
+            borderBottomLeftRadius: 10,
+            backgroundColor: '#e06e34',
+            padding: 12,
           }}>
-          Mar
-        </Text>
-      </View> */}
+          <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>
+            30
+          </Text>
+          <Text
+            style={{
+              fontSize: 13,
+              color: 'white',
+              alignSelf: 'center',
+            }}>
+            Mar
+          </Text>
+        </View> */}
 
         {/* 
       This view is using to show the all types of chalenj name with or without icon with
@@ -120,14 +134,17 @@ const ChalenjItem = ({onChalenjOpenClick}) => {
             height: 70,
             borderTopRightRadius: 10,
             borderBottomRightRadius: 10,
-            padding: 12,
+            padding: 7,
             flexDirection: 'row',
             flex: 1,
           }}>
-          {/* <Image
-          style={{width: 18, height: 18, alignSelf: 'center'}}
-          source={require('../assets/images/logo.png')}
-        /> */}
+          {type == 'dateSpef' ? (
+            <Image
+              style={{width: 18, height: 18, alignSelf: 'center'}}
+              source={imageTop}
+            />
+          ) : null}
+
           <Text
             style={{
               color: '#000',
@@ -136,7 +153,7 @@ const ChalenjItem = ({onChalenjOpenClick}) => {
               fontSize: 14,
               fontWeight: 'bold',
             }}>
-            Chalenj Name
+            {title}
           </Text>
         </View>
       </View>

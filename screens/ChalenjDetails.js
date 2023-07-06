@@ -28,6 +28,8 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
   const [actionListInstractionData, setActionListInstractionData] = useState(
     [],
   );
+  const [refActionListData, setRefActionListData] = useState([]);
+  const [dateSpefActionListData, setDateSpefActionListData] = useState([]);
   const [authToken, setAuthToken] = useState('');
 
   function notifyMessage(msg) {
@@ -81,7 +83,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
   };
 
   //This Api is for chalenj details by id
-  const callChalenjActionListInstractionApi = async () => {
+  const callChalenjActionListInstructionApi = async () => {
     var token = await AsyncStorage.getItem('AuthToken');
     var previewChalenj = 0;
     {
@@ -124,13 +126,109 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
     }
   };
 
+  //This Api is for ref. chalenj details by id
+  const callRefChalenjActionApi = async () => {
+    var token = await AsyncStorage.getItem('AuthToken');
+    var previewChalenj = 0;
+    {
+      isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
+    }
+    console.log(
+      'reflistparams---',
+      isPreviewChalenj,
+      chalenjId,
+      previewChalenj,
+    );
+
+    setAuthToken(token);
+    setLoading(true);
+    try {
+      const response = await ApiConfig.post(
+        '/get-actions-reference',
+        {
+          chalenj_id: chalenjId,
+          preview: previewChalenj,
+        }, //Send Params hear
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }, //Send header config hear
+        {},
+      );
+      console.log('setRefActionListData--- ', response.data.data[0].id);
+      setLoading(false);
+      setRefActionListData(response.data.data);
+    } catch (err) {
+      setLoading(false);
+      console.log(err.response);
+      if (String(err.message).includes('Network')) {
+        notifyMessage(err.message);
+      } else {
+        notifyMessage('Something went wrong.');
+      }
+    }
+  };
+
+  //This Api is for date spef. chalenj details by id
+  const callDateSpefChalenjActionApi = async () => {
+    var token = await AsyncStorage.getItem('AuthToken');
+    var previewChalenj = 0;
+    {
+      isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
+    }
+    console.log(
+      'datelistparams---',
+      isPreviewChalenj,
+      chalenjId,
+      previewChalenj,
+    );
+
+    setAuthToken(token);
+    setLoading(true);
+    try {
+      const response = await ApiConfig.post(
+        '/get-actions-date-specific',
+        {
+          chalenj_id: chalenjId,
+          preview: previewChalenj,
+        }, //Send Params hear
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }, //Send header config hear
+        {},
+      );
+      console.log('setDateSpefActionListData--- ', response.data.data[0].id);
+      setLoading(false);
+      setDateSpefActionListData(response.data.data);
+    } catch (err) {
+      setLoading(false);
+      console.log(err.response);
+      if (String(err.message).includes('Network')) {
+        notifyMessage(err.message);
+      } else {
+        notifyMessage('Something went wrong.');
+      }
+    }
+  };
+
   function callListAction() {
     setActionListData([]);
     callChalenjActionListApi();
   }
-  function callListInstractionAction() {
+  function callListInstructionAction() {
     setActionListInstractionData([]);
-    callChalenjActionListInstractionApi();
+    callChalenjActionListInstructionApi();
+  }
+  function callRefListAction() {
+    setRefActionListData([]);
+    callRefChalenjActionApi();
+  }
+  function callDateSpefListAction() {
+    setDateSpefActionListData([]);
+    callDateSpefChalenjActionApi();
   }
   const isFocused = useIsFocused();
   useEffect(() => {
@@ -141,7 +239,11 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
         chalenjPriority == 2
           ? callListAction()
           : chalenjPriority == 1
-          ? callListInstractionAction()
+          ? callListInstructionAction()
+          : chalenjPriority == 3
+          ? callRefListAction()
+          : chalenjPriority == 0
+          ? callDateSpefListAction()
           : null;
       }
     } else {
@@ -216,6 +318,53 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                         : require('../assets/icons/padlock.png')
                     }
                     title={'' + item.name}
+                    onPressCallback={() =>
+                      console.log('listitemId--', actionListData[index].id)
+                    }
+                  />
+                </View>
+              );
+            }}
+          />
+        ) : chalenjPriority == 3 ? (
+          <FlatList
+            contentContainerStyle={{paddingBottom: 20}}
+            keyExtractor={id => refActionListData.id}
+            data={refActionListData}
+            renderItem={({item, index}) => {
+              return (
+                <View style={{marginHorizontal: 20, marginTop: 10}}>
+                  <ChalenjItem
+                    instStep={item.number}
+                    type="refList"
+                    title={'' + item.name}
+                    onPressCallback={() =>
+                      console.log('listitemId--', actionListData[index].id)
+                    }
+                  />
+                </View>
+              );
+            }}
+          />
+        ) : chalenjPriority == 0 ? (
+          <FlatList
+            contentContainerStyle={{paddingBottom: 20}}
+            keyExtractor={id => dateSpefActionListData.id}
+            data={dateSpefActionListData}
+            renderItem={({item, index}) => {
+              return (
+                <View style={{marginHorizontal: 20, marginTop: 10}}>
+                  <ChalenjItem
+                    taskDay={item.task_day}
+                    instStep={item.number}
+                    type="dateSpef"
+                    title={'' + item.name}
+                    imageTop={
+                      item.action_lock == false
+                        ? require('../assets/icons/open_lock.png')
+                        : require('../assets/icons/padlock.png')
+                    }
+                    bgColor={item.action_lock == false ? '#e06e34' : '#573310'}
                     onPressCallback={() =>
                       console.log('listitemId--', actionListData[index].id)
                     }
