@@ -13,10 +13,11 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
 import CheckBox from 'react-native-check-box';
+import {useSelector} from 'react-redux';
 
 const QuizChalengPage = () => {
   const [myCheckBox, setMyCheckBoxChecked] = useState([]);
-
+  const apiResp = useSelector(state => state.apiRes);
   const inputChecked = [];
 
   const quizAnswer = [
@@ -27,6 +28,8 @@ const QuizChalengPage = () => {
     {answer: 'w'},
   ];
 
+  console.log('apiRespds--', apiResp.apiResponse[0].question.answer.length);
+
   function addCheckBox(numberOfInputs) {
     let cloneArray = [...myCheckBox];
     for (let i = 0; i < numberOfInputs; i++) {
@@ -36,7 +39,7 @@ const QuizChalengPage = () => {
     setMyCheckBoxChecked(cloneArray);
   }
   useEffect(() => {
-    addCheckBox(5);
+    addCheckBox(apiResp.apiResponse[0].question.answer.length);
   }, []);
 
   const toggleCheckBox = (checked, index) => {
@@ -78,7 +81,7 @@ const QuizChalengPage = () => {
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
             <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+              {apiResp.apiResponse[0].name}
             </Text>
             <Text
               style={{
@@ -87,7 +90,7 @@ const QuizChalengPage = () => {
                 fontSize: 14,
                 color: 'white',
               }}>
-              Quiz Chalenj Description.
+              {apiResp.apiResponse[0].description}
             </Text>
             <Text
               style={{
@@ -96,7 +99,7 @@ const QuizChalengPage = () => {
                 color: 'white',
                 marginTop: 15,
               }}>
-              Quiz - Vertical List
+              {apiResp.apiResponse[0].question.question}
             </Text>
             {myCheckBox.map((val, i) => {
               return (
@@ -134,7 +137,9 @@ const QuizChalengPage = () => {
                       ) : (
                         <View></View>
                       )}
-                      <Text style={styles.QuizTitleStyle}>Quiz Title</Text>
+                      <Text style={styles.QuizTitleStyle}>
+                        {apiResp.apiResponse[0].question.answer[i].answer}
+                      </Text>
                     </View>
                   </TouchableOpacity>
                   {val.checked ? (

@@ -50,7 +50,12 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
     {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
-    console.log('listparams---', isPreviewChalenj, chalenjId, previewChalenj);
+    console.log(
+      'listactionparams---',
+      isPreviewChalenj,
+      chalenjId,
+      previewChalenj,
+    );
 
     setAuthToken(token);
     setLoading(true);
@@ -293,7 +298,14 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                     }
                     title={'' + item.name}
                     onPressCallback={() =>
-                      console.log('listitemId--', actionListData[index].id)
+                      // call action detaion page here
+                      navigation.navigate('ChalenjActionPage', {
+                        actionId: item.id,
+                        chalenjId: chalenjId,
+                        isPreviewChalenj: isPreviewChalenj,
+                        subAction: item.children_status,
+                        numberOfAction: actionListData.length,
+                      })
                     }
                   />
                 </View>
@@ -318,9 +330,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                         : require('../assets/icons/padlock.png')
                     }
                     title={'' + item.name}
-                    onPressCallback={() =>
-                      console.log('listitemId--', actionListData[index].id)
-                    }
+                    onPressCallback={() => console.log('listitemId--', item.id)}
                   />
                 </View>
               );
