@@ -51,7 +51,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
     console.log(
-      'listactionparams---',
+      'nlistactionparams---',
       isPreviewChalenj,
       chalenjId,
       previewChalenj,
@@ -296,7 +296,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                         ? require('../assets/images/logo.png')
                         : require('../assets/icons/correct.png')
                     }
-                    title={'' + item.name}
+                    title={item.name_with_tag}
                     onPressCallback={() =>
                       // call action detaion page here
                       navigation.navigate('ChalenjActionPage', {
@@ -305,6 +305,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                         isPreviewChalenj: isPreviewChalenj,
                         subAction: item.children_status,
                         numberOfAction: actionListData.length,
+                        actionNum: index + 1,
                       })
                     }
                   />

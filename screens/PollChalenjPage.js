@@ -12,11 +12,26 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
 import CheckBox from 'react-native-check-box';
+const {convert} = require('html-to-text');
+import {useSelector} from 'react-redux';
 
 const PollChalenjPage = () => {
   const [myCheckBox, setMyCheckBoxChecked] = useState([]);
-
   const inputChecked = [];
+  const apiResp = useSelector(state => state.apiRes);
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const questiontext = convert(
+    apiResp.apiResponse[0].question.question,
+    options,
+  );
+  const name = nameText.trim();
+  const description = descText.trim();
+  const chalenjQuestion = questiontext.trim();
 
   function addCheckBox(numberOfInputs) {
     let cloneArray = [...myCheckBox];
@@ -27,7 +42,7 @@ const PollChalenjPage = () => {
     setMyCheckBoxChecked(cloneArray);
   }
   useEffect(() => {
-    addCheckBox(5);
+    addCheckBox(apiResp.apiResponse[0].question.answer.length);
   }, []);
 
   const toggleCheckBox = (checked, index) => {
@@ -68,26 +83,33 @@ const PollChalenjPage = () => {
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
-                fontSize: 14,
+                fontSize: 13,
                 color: 'white',
               }}>
-              Poll Vertical List Chalenj Description.
+              {description}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 fontWeight: 'bold',
-                fontSize: 20,
+                fontSize: 15,
                 color: 'white',
                 marginTop: 15,
               }}>
-              Poll - Vertical List
+              {chalenjQuestion}
             </Text>
             {myCheckBox.map((val, i) => {
               return (
@@ -110,14 +132,16 @@ const PollChalenjPage = () => {
                           : toggleCheckBox(true, i);
                         console.log('checkedVal--' + JSON.stringify(val), i);
                       }}
-                      rightText={'Poll 1'}
+                      rightText={
+                        apiResp.apiResponse[0].question.answer[i].answer
+                      }
                       isChecked={val.checked}
                       disabled={false}
                       checkBoxColor="white"
                       checkedCheckBoxColor={val.checked ? '#ffffff' : '#e06e34'}
                       rightTextStyle={{
                         color: 'black',
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: 'bold',
                       }}
                       backgroundColor="red"

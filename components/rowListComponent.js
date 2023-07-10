@@ -1,6 +1,12 @@
 import React from 'react';
 import {Card} from 'react-native-paper';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+const {convert} = require('html-to-text');
+
+const options = {
+  wordwrap: false,
+  // ...
+};
 
 const ListComponent = ({
   childStatus,
@@ -10,6 +16,8 @@ const ListComponent = ({
   title,
   onPressCallback,
 }) => {
+  const text = convert(title, options);
+  const chalenjtitle = text.trim();
   console.log(type);
   return (
     <View style={{flex: 1}}>
@@ -57,12 +65,14 @@ const ListComponent = ({
 
             <View style={{alignSelf: 'center', marginStart: 15, flex: 1}}>
               <Text
+                numberOfLines={2}
+                ellipsizeMode="tail"
                 style={{
                   color: 'black',
                   fontSize: 16,
                   fontWeight: 'bold',
                 }}>
-                {title}
+                {chalenjtitle}
               </Text>
               {type == 'listchalenj' || 'instlistchalenj' ? null : (
                 <Text

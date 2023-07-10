@@ -13,7 +13,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
 import ButtonWithIcon from '../components/ButtonWithIconComponent';
 import HorizontalRatingComponent from '../components/horizontalRatingComponent';
+import {useSelector} from 'react-redux';
 
+const {convert} = require('html-to-text');
 function notifyMessage(msg) {
   if (Platform.OS === 'android') {
     ToastAndroid.show(' ' + msg, ToastAndroid.SHORT);
@@ -23,6 +25,21 @@ function notifyMessage(msg) {
 }
 const HorizoltalRatingPage = () => {
   const [clickedRating, setClickedRating] = useState('0');
+  const apiResp = useSelector(state => state.apiRes);
+
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const questiontext = convert(
+    apiResp.apiResponse[0].question.question,
+    options,
+  );
+  const name = nameText.trim();
+  const description = descText.trim();
+  const chalenjQuestion = questiontext.trim();
 
   console.log('clickedRating-' + clickedRating);
   return (
@@ -34,22 +51,30 @@ const HorizoltalRatingPage = () => {
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
-                fontSize: 14,
+                fontSize: 13,
                 color: 'white',
               }}>
-              Rating Horizontal Chalenj Description.
+              {description}
             </Text>
 
             <View style={{marginTop: 20}}>
-              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
-                Rating Horizontal
+              <Text
+                numberOfLines={2}
+                ellipsizeMode="tail"
+                style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+                {chalenjQuestion}
               </Text>
 
               <View

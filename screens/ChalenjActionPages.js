@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+
 import {
   Image,
   SafeAreaView,
@@ -30,23 +31,30 @@ import {useIsFocused} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 
 const ChalenjActionPage = ({route, navigation, props}) => {
-  const [pageCount, setPageCount] = useState(1);
   const [authToken, setAuthToken] = useState('');
   const [actionTaskList, setActionTaskList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [render, setRender] = useState(0);
 
   const dispatch = useDispatch();
-  const {actionId, chalenjId, isPreviewChalenj, subAction, numberOfAction} =
-    route.params;
-  console.log(
-    'actionlistnavigation--',
+  const {
     actionId,
     chalenjId,
     isPreviewChalenj,
     subAction,
     numberOfAction,
+    actionNum,
+  } = route.params;
+  console.log(
+    'aactionlistnavigation--',
+    actionId,
+    chalenjId,
+    isPreviewChalenj,
+    subAction,
+    numberOfAction,
+    actionNum,
   );
+  const [pageCount, setPageCount] = useState(actionNum);
 
   function notifyMessage(msg) {
     if (Platform.OS === 'android') {
@@ -82,7 +90,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
     console.log(
-      'paramactiontask--',
+      'actiondetailsparama--',
       token,
       chalenjId,
       isPreviewChalenj,
@@ -186,10 +194,32 @@ const ChalenjActionPage = ({route, navigation, props}) => {
           </TouchableOpacity>
         </View>
 
-        {loading == false && actionTaskList[0].type == 10 ? (
+        {loading == false &&
+        actionTaskList[0].type == 10 &&
+        actionTaskList[0].question.question_type == 1 ? (
           <QuizChalengPage />
-        ) : loading == false && actionTaskList[0].type == 9 ? (
+        ) : loading == false &&
+          actionTaskList[0].type == 10 &&
+          actionTaskList[0].question.question_type == 2 ? (
+          <PollChalenjPage />
+        ) : loading == false &&
+          actionTaskList[0].type == 10 &&
+          actionTaskList[0].question.question_type == 3 ? (
+          <HorizoltalRatingPage />
+        ) : loading == false &&
+          actionTaskList[0].type == 10 &&
+          actionTaskList[0].question.question_type == 4 ? (
+          <RatingStarChalenj />
+        ) : loading == false &&
+          actionTaskList[0].type == 10 &&
+          actionTaskList[0].question.question_type == 5 &&
+          actionTaskList[0].question.choice_feature == 0 ? (
           <SingleChoiceVerticalPage />
+        ) : loading == false &&
+          actionTaskList[0].type == 10 &&
+          actionTaskList[0].question.question_type == 5 &&
+          actionTaskList[0].question.choice_feature == 2 ? (
+          <MultiChoiceVerticalPage />
         ) : null}
 
         {/* {actionTaskList.type == 10 ? (
