@@ -19,10 +19,21 @@ import {
   requestCameraPermission,
   requestExternalWritePermission,
 } from '../constant/PermissionConstant';
+import {useSelector} from 'react-redux';
+const {convert} = require('html-to-text');
 
 const UploadImageChalenj = () => {
   const navigation = useNavigation();
   const [showImageOpt, setShowImageOpt] = useState(false);
+  const apiResp = useSelector(state => state.apiRes);
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const name = nameText.trim();
+  const description = descText.trim();
 
   const captureImage = async type => {
     let options = {
@@ -99,18 +110,23 @@ const UploadImageChalenj = () => {
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
-          <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+          <View
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            style={{marginVertical: 20}}>
+            <Text style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
                 fontSize: 14,
                 color: 'white',
               }}>
-              Upload Image Chalenj Description.
+              {description}
             </Text>
 
             <View style={{marginTop: 20}}>

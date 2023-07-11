@@ -1,11 +1,18 @@
 import React, {useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import ButtonWithIcon from '../components/ButtonWithIconComponent';
 import {useSelector} from 'react-redux';
+import ButtonComponent from '../components/buttonComponent';
 const {convert} = require('html-to-text');
 
-const OpenPDFChalenj = () => {
+const CompleteAction = () => {
   const [message, setmessage] = useState('');
   const apiResp = useSelector(state => state.apiRes);
   const options = {
@@ -17,6 +24,9 @@ const OpenPDFChalenj = () => {
   const name = nameText.trim();
   const description = descText.trim();
 
+  const getInputData = () => {
+    console.log('Message-- ' + message);
+  };
   return (
     <SafeAreaView style={{flex: 1}}>
       <LinearGradient
@@ -25,16 +35,14 @@ const OpenPDFChalenj = () => {
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
-          <View
-            numberOfLines={2}
-            ellipsizeMode="tail"
-            style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
-              {name}
-            </Text>
+          <View style={{marginVertical: 20}}>
             <Text
               numberOfLines={2}
               ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
+            </Text>
+            <Text
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
@@ -43,16 +51,14 @@ const OpenPDFChalenj = () => {
               }}>
               {description}
             </Text>
-
             <View style={{marginTop: 20}}>
-              <ButtonWithIcon
-                btnIcon={require('../assets/icons/ic_pdf.png')}
-                bgColor="#e06e34"
-                btnTitle="Open PDF"
-                btnTitleColor="#fff"
-                onPressCallback={() => {
-                  console.log('Pressed');
-                }}
+              <ButtonComponent
+                bgColor="#563410"
+                textColor="#fff"
+                title="Tap To Complete"
+                showIcon={true}
+                btnIcon={require('../assets/icons/ic_right_tick.png')}
+                onPressCallback={() => getInputData()}
               />
             </View>
           </View>
@@ -62,6 +68,17 @@ const OpenPDFChalenj = () => {
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  InputStyle: {
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#171b26',
+    borderColor: 'white',
+    borderWidth: 1,
+    paddingHorizontal: 15,
+    fontSize: 14,
+    color: 'white',
+  },
+});
 
-export default OpenPDFChalenj;
+export default CompleteAction;

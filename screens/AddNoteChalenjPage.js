@@ -8,8 +8,21 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {useSelector} from 'react-redux';
+import ButtonComponent from '../components/buttonComponent';
+const {convert} = require('html-to-text');
+
 const AddNoteChalenj = () => {
   const [message, setmessage] = useState('');
+  const apiResp = useSelector(state => state.apiRes);
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const name = nameText.trim();
+  const description = descText.trim();
 
   const getInputData = () => {
     console.log('Message-- ' + message);
@@ -23,17 +36,22 @@ const AddNoteChalenj = () => {
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
                 fontSize: 14,
                 color: 'white',
               }}>
-              Add note Chalenj Description.
+              {description}
             </Text>
 
             <View style={{marginTop: 20}}>

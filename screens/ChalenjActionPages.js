@@ -29,6 +29,8 @@ import ApiConfig from '../AppNetwork/ApiConfig';
 import {Modal} from 'react-native-paper';
 import {useIsFocused} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
+import CertificatePage from './certificatePage';
+import CompleteAction from './CompleteActionPage';
 
 const ChalenjActionPage = ({route, navigation, props}) => {
   const [authToken, setAuthToken] = useState('');
@@ -64,23 +66,14 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     }
   }
 
-  function callActionTaskList() {
+  const callActionTaskList = () => {
     setActionTaskList([]);
     callChalenjActionListApi();
-  }
+  };
 
-  const isFocused = useIsFocused();
   useEffect(() => {
-    console.log('called');
-    // Call only when screen open or when back on screen
-    if (isFocused) {
-      {
-        callActionTaskList();
-      }
-    } else {
-      setActionTaskList([]);
-    }
-  }, [props, isFocused]);
+    callActionTaskList();
+  }, []);
 
   //This Api is for action details by id
   const callChalenjActionListApi = async () => {
@@ -90,8 +83,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
     console.log(
-      'actiondetailsparama--',
-      token,
+      'aaactiondetailsparama--',
       chalenjId,
       isPreviewChalenj,
       actionId,
@@ -220,6 +212,28 @@ const ChalenjActionPage = ({route, navigation, props}) => {
           actionTaskList[0].question.question_type == 5 &&
           actionTaskList[0].question.choice_feature == 2 ? (
           <MultiChoiceVerticalPage />
+        ) : loading == false && actionTaskList[0].type == 1 ? (
+          <VideoChalenjPage />
+        ) : loading == false && actionTaskList[0].type == 2 ? (
+          <AddNoteChalenj />
+        ) : loading == false && actionTaskList[0].type == 3 ? (
+          <UploadDocChalenj />
+        ) : loading == false && actionTaskList[0].type == 4 ? (
+          <OpenPDFChalenj />
+        ) : loading == false && actionTaskList[0].type == 5 ? (
+          <UploadImageChalenj />
+        ) : loading == false && actionTaskList[0].type == 6 ? (
+          <OpenLinkChalenj />
+        ) : loading == false && actionTaskList[0].type == 7 ? (
+          <SendEmailChalenj /> //remaining to implement also 8,9
+        ) : loading == false && actionTaskList[0].type == 8 ? (
+          <CompleteAction />
+        ) : loading == false && actionTaskList[0].type == 11 ? (
+          <FormChalenjPage />
+        ) : loading == false && actionTaskList[0].type == 12 ? (
+          <OpenCertificatePage />
+        ) : loading == false && actionTaskList[0].type == 13 ? (
+          <QRScanChalenj />
         ) : null}
 
         {/* {actionTaskList.type == 10 ? (

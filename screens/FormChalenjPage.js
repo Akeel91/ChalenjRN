@@ -11,10 +11,21 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
 import FormComponents from '../components/FormComponent';
+import {useSelector} from 'react-redux';
+const {convert} = require('html-to-text');
 
 const FormChalenjPage = () => {
   const [myTextInput, setMyTextInput] = useState([]);
   const inputValues = [];
+  const apiResp = useSelector(state => state.apiRes);
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const name = nameText.trim();
+  const description = descText.trim();
 
   function addInputText(numberOfInputs) {
     let cloneArray = [...myTextInput];
@@ -25,7 +36,7 @@ const FormChalenjPage = () => {
     setMyTextInput(cloneArray);
   }
   useEffect(() => {
-    addInputText(5);
+    addInputText(apiResp.apiResponse[0].form_filed_data.length);
   }, []);
 
   const onChangeText = (text, index) => {
@@ -67,23 +78,32 @@ const FormChalenjPage = () => {
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
                 fontSize: 14,
                 color: 'white',
               }}>
-              Form Chalenj Description.
+              {description}
             </Text>
 
             {myTextInput.map((val, i) => {
               return (
                 <View style={{marginTop: 15}}>
-                  <FormComponents QuestionTitle="Form Question" />
+                  <FormComponents
+                    QuestionTitle={
+                      apiResp.apiResponse[0].form_filed_data[i].field_text
+                    }
+                  />
                   <TextInput
                     value={val.text}
                     key={String(i)}

@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react';
-const {convert} = require('html-to-text');
-
 import {
   Alert,
   Image,
@@ -16,12 +14,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
 import CheckBox from 'react-native-check-box';
 import {useSelector} from 'react-redux';
+const {convert} = require('html-to-text');
 
 const QuizChalengPage = () => {
   const [myCheckBox, setMyCheckBoxChecked] = useState([]);
-  const apiResp = useSelector(state => state.apiRes);
   const inputChecked = [];
-
   const quizAnswer = [
     {answer: 'w'},
     {answer: 'w'},
@@ -29,7 +26,7 @@ const QuizChalengPage = () => {
     {answer: 'w'},
     {answer: 'w'},
   ];
-
+  const apiResp = useSelector(state => state.apiRes);
   const options = {
     wordwrap: false,
     // ...

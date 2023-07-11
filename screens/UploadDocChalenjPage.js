@@ -11,6 +11,8 @@ import {
 import DocumentPicker from 'react-native-document-picker';
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonWithIcon from '../components/ButtonWithIconComponent';
+import {useSelector} from 'react-redux';
+const {convert} = require('html-to-text');
 
 function notifyMessage(msg) {
   if (Platform.OS === 'android') {
@@ -21,6 +23,15 @@ function notifyMessage(msg) {
 }
 const UploadDocChalenj = () => {
   const [fileResponse, setFileResponse] = useState([]);
+  const apiResp = useSelector(state => state.apiRes);
+  const options = {
+    wordwrap: false,
+    // ...
+  };
+  const nameText = convert(apiResp.apiResponse[0].name, options);
+  const descText = convert(apiResp.apiResponse[0].description, options);
+  const name = nameText.trim();
+  const description = descText.trim();
 
   const handleDocumentSelection = useCallback(async () => {
     try {
@@ -45,17 +56,22 @@ const UploadDocChalenj = () => {
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}>
           <View style={{marginVertical: 20}}>
-            <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>
-              Chalenj Title
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{fontWeight: 'bold', fontSize: 15, color: 'white'}}>
+              {name}
             </Text>
             <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
               style={{
                 marginTop: 25,
                 fontWeight: 'bold',
                 fontSize: 14,
                 color: 'white',
               }}>
-              Upload Doc Chalenj Description.
+              {description}
             </Text>
 
             <View style={{marginTop: 20}}>
