@@ -19,8 +19,10 @@ const AddNoteChalenj = () => {
     wordwrap: false,
     // ...
   };
-  const nameText = convert(apiResp.apiResponse[0].name, options);
-  const descText = convert(apiResp.apiResponse[0].description, options);
+  const nameText = convert(apiResp.apiResponse.name, options);
+  const descText = convert(apiResp.apiResponse.description, options);
+  const taskStatus = apiResp.apiResponse.task_status;
+  const taskContent = apiResp.apiResponse.ts_content;
   const name = nameText.trim();
   const description = descText.trim();
 
@@ -60,16 +62,18 @@ const AddNoteChalenj = () => {
                 autoCorrect={false}
                 style={styles.InputStyle}
                 placeholder="Enter note here"
-                value={message}
+                value={taskStatus == 1 ? taskContent : message}
                 onChangeText={newmessage => setmessage(newmessage)}
                 placeholderTextColor="#8f9392"
                 numberOfLines={5}
                 textAlignVertical="top"
+                editable={taskStatus == 1 ? false : true}
                 multiline={true}
+                defaultValue="AAAA"
               />
             </View>
 
-            {message.length > 0 ? (
+            {message.length > 0 && taskStatus == 0 ? (
               <View style={{marginTop: 20}}>
                 <ButtonComponent
                   bgColor="#563410"

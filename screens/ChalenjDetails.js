@@ -7,6 +7,9 @@ import {
   ToastAndroid,
   Image,
   View,
+  TouchableOpacity,
+  ScrollView,
+  Text,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import HeaderComponent from '../components/HeaderComponent';
@@ -18,6 +21,8 @@ import {Modal} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
 import ListComponent from '../components/rowListComponent';
+import ButtonComponent from '../components/buttonComponent';
+import APPLICATION_CONSTANTS from '../constant/constantsFile';
 
 const ChalenjDetailsPage = ({route, navigation, props}) => {
   const [clickStatas, setClickStatas] = useState(false);
@@ -25,6 +30,8 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
   const [searchClick, setSearchClick] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionListData, setActionListData] = useState([]);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [info2ModalVisible, setInfo2ModalVisible] = useState(false);
   const [actionListInstractionData, setActionListInstractionData] = useState(
     [],
   );
@@ -95,7 +102,7 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
     console.log(
-      'instlistparams---',
+      'aainstlistparams---',
       isPreviewChalenj,
       chalenjId,
       previewChalenj,
@@ -130,6 +137,11 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
       }
     }
   };
+
+  function showInfo2View() {
+    setInfoModalVisible(!infoModalVisible);
+    setInfo2ModalVisible(true);
+  }
 
   //This Api is for ref. chalenj details by id
   const callRefChalenjActionApi = async () => {
@@ -326,12 +338,25 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                     instStep={item.number}
                     type="instlistchalenj"
                     imageTop={
-                      item.action_lock == false
+                      item.action_completed == true
+                        ? require('../assets/icons/correct.png')
+                        : item.action_lock == false
                         ? require('../assets/icons/open_lock.png')
                         : require('../assets/icons/padlock.png')
                     }
                     title={'' + item.name}
-                    onPressCallback={() => console.log('listitemId--', item.id)}
+                    onPressCallback={() => {
+                      item.action_lock == false
+                        ? navigation.navigate('ChalenjActionPage', {
+                            actionId: item.id,
+                            chalenjId: chalenjId,
+                            isPreviewChalenj: isPreviewChalenj,
+                            subAction: item.children_status,
+                            numberOfAction: actionListInstractionData.length,
+                            actionNum: index + 1,
+                          })
+                        : setInfoModalVisible(true);
+                    }}
                   />
                 </View>
               );
@@ -403,11 +428,160 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
           />
         </View>
       </Modal>
+
+      {/* For info pop up */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={infoModalVisible}
+        onRequestClose={() => {
+          // Alert.alert('Modal has been closed.');
+          setInfoModalVisible(!infoModalVisible);
+        }}>
+        <View style={styles.modalView}>
+          <ScrollView>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                style={{width: 80, height: 80, borderRadius: 50}}
+                source={require('../assets/icons/info_icon.png')}
+              />
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  color: 'black',
+                  marginTop: 15,
+                }}>
+                {APPLICATION_CONSTANTS.Info1}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                  marginBottom: 20,
+                  marginTop: 10,
+                }}>
+                <View style={{flex: 1, marginEnd: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#e06e34"
+                    textColor="#ffffff"
+                    title="Yes"
+                    showIcon={false}
+                    onPressCallback={() => showInfo2View()}
+                  />
+                </View>
+                <View style={{flex: 1, marginStart: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#252635"
+                    textColor="#ffffff"
+                    title="No"
+                    showIcon={false}
+                    onPressCallback={() =>
+                      setInfoModalVisible(!infoModalVisible)
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* For info 2 pop up */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={info2ModalVisible}
+        onRequestClose={() => {
+          // Alert.alert('Modal has been closed.');
+          setInfo2ModalVisible(!info2ModalVisible);
+        }}>
+        <View style={styles.modalView}>
+          <ScrollView>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                style={{width: 80, height: 80, borderRadius: 50}}
+                source={require('../assets/icons/info_icon.png')}
+              />
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  color: 'black',
+                  marginTop: 15,
+                }}>
+                Whoops
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: 'black',
+                  marginTop: 15,
+                  textAlign: 'center',
+                }}>
+                {APPLICATION_CONSTANTS.Info2}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                  marginBottom: 20,
+                  marginTop: 10,
+                }}>
+                <View style={{flex: 1, marginEnd: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#e06e34"
+                    textColor="#ffffff"
+                    title="Yes"
+                    showIcon={false}
+                    onPressCallback={() => console.log('Pressed')}
+                  />
+                </View>
+                <View style={{flex: 1, marginStart: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#252635"
+                    textColor="#ffffff"
+                    title="No"
+                    showIcon={false}
+                    onPressCallback={() =>
+                      setInfo2ModalVisible(!info2ModalVisible)
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    width: '90%',
+    maxHeight: '95%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
   progressViewStyle: {
     backgroundColor: 'white',
     borderRadius: 10,

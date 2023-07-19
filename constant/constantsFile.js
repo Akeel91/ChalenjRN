@@ -21,6 +21,9 @@ const APPLICATION_CONSTANTS = {
     'What is Chalenj? A new way to learn, experience, entertain and more!',
   QRPAGE_DETAILS:
     'Your QR code is private. If you share it with someone, they can scan it with their Chalenj account to complete an action.',
+  Info1: 'Do you want to unlock this Action?',
+  Info2:
+    'Whoops you missed a step! Complete previous steps in order. Would you like to go to the missed step?',
 };
 
 export default APPLICATION_CONSTANTS;

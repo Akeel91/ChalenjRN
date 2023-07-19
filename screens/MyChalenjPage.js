@@ -453,6 +453,7 @@ const ChalenjPage = props => {
     {
       type == 'preview' ? (previewChalenj = true) : (previewChalenj = false);
     }
+    AsyncStorage.setItem('savePreviewType', previewChalenj);
     setIsPreviewchalenj(previewChalenj);
     console.log('refreshchalenj--', chalenjId, type, previewChalenj);
     var token = await AsyncStorage.getItem('AuthToken');
@@ -797,6 +798,8 @@ const ChalenjPage = props => {
                         console.log('name - ' + item.name);
                         // manage view for view actions
                         setActionViewVisible(true);
+                        //set preview type in pref
+
                         callChalenjDetailsApi(item.id, item.display_type);
                       }}
                       onPreviewClick={() => {

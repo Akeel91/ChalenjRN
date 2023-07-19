@@ -22,6 +22,7 @@ import QRScanPage from '../screens/QRScanPage';
 import ViewActionsPage from '../screens/ViewActionsPage';
 import OpenCertificatePage from '../screens/OpenCertificatePage';
 import QRScanChalenj from '../screens/QRScanChalenjPage';
+import PollChalenjPage from '../screens/PollChalenjPage';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -363,6 +364,23 @@ const StackNavigator = () => {
           },
         }}
       />
+
+      {/* <Stack.Screen
+        name="PollAction"
+        component={PollChalenjPage}
+        options={{
+          headerShown: false,
+          title: 'WelCome',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      /> */}
     </Stack.Navigator>
   );
 };

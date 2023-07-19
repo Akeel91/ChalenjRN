@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -36,7 +37,9 @@ const ChalenjActionPage = ({route, navigation, props}) => {
   const [authToken, setAuthToken] = useState('');
   const [actionTaskList, setActionTaskList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [render, setRender] = useState(0);
+  const [showSubMenu, setShowSubMenu] = useState(false);
+  const [myCheckBox, setMyCheckBoxChecked] = useState([]);
+  const [showFisrtSelected, setShowFisrtSelected] = useState(true);
 
   const dispatch = useDispatch();
   const {
@@ -48,7 +51,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     actionNum,
   } = route.params;
   console.log(
-    'aactionlistnavigation--',
+    'listactionlistnavigation--',
     actionId,
     chalenjId,
     isPreviewChalenj,
@@ -56,7 +59,38 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     numberOfAction,
     actionNum,
   );
+  const [openchalenjId, setChalenjId] = useState(chalenjId);
+  const [nxtactionId, setNxtActionId] = useState(actionId);
+  const [callApi, setCallApi] = useState(false);
+
   const [pageCount, setPageCount] = useState(actionNum);
+
+  function addCheckBox(numberOfInputs) {
+    let cloneArray = [...myCheckBox];
+    for (let i = 0; i < numberOfInputs; i++) {
+      cloneArray.push({checked: false});
+      console.log('cloneArray ' + JSON.stringify(cloneArray));
+    }
+    setMyCheckBoxChecked(cloneArray);
+  }
+
+  // useEffect(() => {
+  //   addCheckBox(response.data.data.action_array.length);
+  // }, []);
+
+  const toggleCheckBox = (checked, index) => {
+    console.log('cccc= ' + checked, index);
+    let updateInput = myCheckBox.map((item, i) => {
+      if (index == i) {
+        return {...item, checked: checked};
+      } else {
+        return {...item, checked: false};
+      }
+      return item;
+    });
+
+    setMyCheckBoxChecked(updateInput);
+  };
 
   function notifyMessage(msg) {
     if (Platform.OS === 'android') {
@@ -66,35 +100,43 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     }
   }
 
-  const callActionTaskList = () => {
+  function callSubActionClicked(val, i) {
+    setChalenjId(actionTaskList.chalenj_id);
+    setNxtActionId(actionTaskList.action_array[i].id);
+    callNxtActionTaskList(actionTaskList.action_array[i].id);
+    setShowFisrtSelected(false);
+    val.checked ? toggleCheckBox(false, i) : toggleCheckBox(true, i);
+  }
+  const callNxtActionTaskList = actionId => {
+    setCallApi(false);
     setActionTaskList([]);
-    callChalenjActionListApi();
+    callChalenjActionListApi(actionId);
+  };
+
+  const callActionTaskList = actionId => {
+    setActionTaskList([]);
+    callChalenjActionListApi(actionId);
   };
 
   useEffect(() => {
-    callActionTaskList();
+    callActionTaskList(actionId);
   }, []);
 
   //This Api is for action details by id
-  const callChalenjActionListApi = async () => {
+  const callChalenjActionListApi = async actionId => {
     var token = await AsyncStorage.getItem('AuthToken');
     var previewChalenj = 0;
     {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
-    console.log(
-      'aaactiondetailsparama--',
-      chalenjId,
-      isPreviewChalenj,
-      actionId,
-    );
+    console.log('detailsparm--', openchalenjId, previewChalenj, actionId);
     setAuthToken(token);
     setLoading(true);
     try {
       const response = await ApiConfig.post(
         '/get-action-detail',
         {
-          chalenj_id: chalenjId,
+          chalenj_id: openchalenjId,
           preview: previewChalenj,
           action_id: actionId,
         }, //Send Params hear
@@ -106,9 +148,18 @@ const ChalenjActionPage = ({route, navigation, props}) => {
         {},
       );
       setActionTaskList(response.data.data);
-      console.log('nsetActionTaskList--- ', response.data.data[0].type);
+      setShowSubMenu(subAction);
+      console.log('myCheckBox--', myCheckBox.length);
+      {
+        myCheckBox.length == 0
+          ? addCheckBox(response.data.data.action_array.length)
+          : null;
+      }
+
+      // console.log('instRespoId--- ', response.data.data.action_array[0].id);
       dispatch({type: 'apiResponse', payload: response.data.data});
       setLoading(false);
+      setCallApi(true);
     } catch (err) {
       setLoading(false);
       console.log(err.response);
@@ -121,7 +172,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#61626c'}}>
       <View style={{flex: 1}}>
         <View style={styles.HeaderStyle}>
           <TouchableOpacity
@@ -151,6 +202,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
             />
           </TouchableOpacity>
         </View>
+
         <View style={styles.PaginationStyle}>
           <TouchableOpacity
             style={styles.ImageStyle}
@@ -170,9 +222,11 @@ const ChalenjActionPage = ({route, navigation, props}) => {
           <TouchableOpacity
             style={styles.ImageStyle}
             onPress={() => {
-              pageCount < numberOfAction
-                ? setPageCount(pageCount + 1)
-                : setPageCount(numberOfAction);
+              callApi == true && actionTaskList.advance_arrow.next_id != ''
+                ? pageCount < numberOfAction
+                  ? setPageCount(pageCount + 1)
+                  : setPageCount(numberOfAction)
+                : null;
             }}>
             <Image
               style={{
@@ -180,84 +234,137 @@ const ChalenjActionPage = ({route, navigation, props}) => {
                 width: 30,
                 height: 30,
                 transform: [{rotate: '180deg'}],
+                opacity:
+                  callApi == true && actionTaskList.advance_arrow.next_id == ''
+                    ? 0.2
+                    : null,
               }}
               source={require('../assets/icons/ic_back.png')}
             />
           </TouchableOpacity>
         </View>
 
-        {loading == false &&
-        actionTaskList[0].type == 10 &&
-        actionTaskList[0].question.question_type == 1 ? (
+        {callApi == true &&
+        actionTaskList.type == 10 &&
+        actionTaskList.question.question_type == 1 ? (
           <QuizChalengPage />
-        ) : loading == false &&
-          actionTaskList[0].type == 10 &&
-          actionTaskList[0].question.question_type == 2 ? (
-          <PollChalenjPage />
-        ) : loading == false &&
-          actionTaskList[0].type == 10 &&
-          actionTaskList[0].question.question_type == 3 ? (
-          <HorizoltalRatingPage />
-        ) : loading == false &&
-          actionTaskList[0].type == 10 &&
-          actionTaskList[0].question.question_type == 4 ? (
+        ) : callApi == true &&
+          actionTaskList.type == 10 &&
+          actionTaskList.question.question_type == 2 ? (
+          <PollChalenjPage navigation={navigation} />
+        ) : callApi == true &&
+          actionTaskList.type == 10 &&
+          actionTaskList.question.question_type == 3 ? (
+          <HorizoltalRatingPage navigation={navigation} />
+        ) : callApi == true &&
+          actionTaskList.type == 10 &&
+          actionTaskList.question.question_type == 4 ? (
           <RatingStarChalenj />
-        ) : loading == false &&
-          actionTaskList[0].type == 10 &&
-          actionTaskList[0].question.question_type == 5 &&
-          actionTaskList[0].question.choice_feature == 0 ? (
+        ) : callApi == true &&
+          actionTaskList.type == 10 &&
+          actionTaskList.question.question_type == 5 &&
+          actionTaskList.question.choice_feature == 0 ? (
           <SingleChoiceVerticalPage />
-        ) : loading == false &&
-          actionTaskList[0].type == 10 &&
-          actionTaskList[0].question.question_type == 5 &&
-          actionTaskList[0].question.choice_feature == 2 ? (
+        ) : callApi == true &&
+          actionTaskList.type == 10 &&
+          actionTaskList.question.question_type == 5 &&
+          actionTaskList.question.choice_feature == 2 ? (
           <MultiChoiceVerticalPage />
-        ) : loading == false && actionTaskList[0].type == 1 ? (
+        ) : callApi == true && actionTaskList.type == 1 ? (
           <VideoChalenjPage />
-        ) : loading == false && actionTaskList[0].type == 2 ? (
-          <AddNoteChalenj />
-        ) : loading == false && actionTaskList[0].type == 3 ? (
+        ) : callApi == true && actionTaskList.type == 2 ? (
+          <AddNoteChalenj navigation={navigation} />
+        ) : callApi == true && actionTaskList.type == 3 ? (
           <UploadDocChalenj />
-        ) : loading == false && actionTaskList[0].type == 4 ? (
+        ) : callApi == true && actionTaskList.type == 4 ? (
           <OpenPDFChalenj />
-        ) : loading == false && actionTaskList[0].type == 5 ? (
+        ) : callApi == true && actionTaskList.type == 5 ? (
           <UploadImageChalenj />
-        ) : loading == false && actionTaskList[0].type == 6 ? (
+        ) : callApi == true && actionTaskList.type == 6 ? (
           <OpenLinkChalenj />
-        ) : loading == false && actionTaskList[0].type == 7 ? (
+        ) : callApi == true && actionTaskList.type == 7 ? (
           <SendEmailChalenj /> //remaining to implement also 8,9
-        ) : loading == false && actionTaskList[0].type == 8 ? (
-          <CompleteAction />
-        ) : loading == false && actionTaskList[0].type == 11 ? (
+        ) : callApi == true && actionTaskList.type == 8 ? (
+          <CompleteAction navigation={navigation} />
+        ) : callApi == true && actionTaskList.type == 11 ? (
           <FormChalenjPage />
-        ) : loading == false && actionTaskList[0].type == 12 ? (
+        ) : callApi == true && actionTaskList.type == 12 ? (
           <OpenCertificatePage />
-        ) : loading == false && actionTaskList[0].type == 13 ? (
+        ) : callApi == true && actionTaskList.type == 13 ? (
           <QRScanChalenj />
         ) : null}
 
-        {/* {actionTaskList.type == 10 ? (
-          
-        ) : (
-          <SingleChoiceVerticalPage />
-        )} */}
+        {showSubMenu == true && callApi == true ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              backgroundColor: '#61626c',
+              alignContent: 'space-around',
+            }}>
+            <ScrollView
+              contentContainerStyle={{
+                justifyContent: 'center',
+                marginBottom: 30,
+                flexGrow: 1,
+              }}
+              horizontal
+              showsHorizontalScrollIndicator={false}>
+              {myCheckBox.map((val, i) => {
+                return (
+                  <View
+                    style={{
+                      marginTop: 5,
+                      marginEnd: 10,
+                    }}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        {
+                          actionTaskList.action_array[i].task_status == 1 ||
+                          actionTaskList.action_array[i].task_status == 0
+                            ? callSubActionClicked(val, i)
+                            : null;
+                        }
+                      }}
+                      style={{
+                        height: 40,
+                        width: 40,
+                        borderRadius: 50,
+                        backgroundColor:
+                          i == 0 && showFisrtSelected == true
+                            ? '#e06e34'
+                            : val.checked
+                            ? '#e06e34'
+                            : '#808080',
+                        justifyContent: 'center',
+                        paddingHorizontal: 10,
+                      }}>
+                      <View style={{flexDirection: 'row'}}>
+                        <Image
+                          key={String(i)}
+                          style={{
+                            width: 20,
+                            borderWidth: 1,
 
-        {/* {pageCount == 1 && <QuizChalengPage />}
-        {pageCount == 2 && <SingleChoiceVerticalPage />}
-        {pageCount == 3 && <MultiChoiceVerticalPage />}
-        {pageCount == 4 && <AddNoteChalenj />}
-        {pageCount == 5 && <UploadDocChalenj />}
-        {pageCount == 6 && <OpenLinkChalenj />}
-        {pageCount == 7 && <OpenPDFChalenj />}
-        {pageCount == 8 && <FormChalenjPage />}
-        {pageCount == 9 && <QRScanChalenj />}
-        {pageCount == 10 && <VideoChalenjPage />}
-        {pageCount == 11 && <UploadImageChalenj />}
-        {pageCount == 12 && <SendEmailChalenj />}
-        {pageCount == 13 && <HorizoltalRatingPage />}
-        {pageCount == 14 && <RatingStarChalenj />}
-        {pageCount == 15 && <PollChalenjPage />}
-        {pageCount == 16 && <OpenCertificatePage />} */}
+                            height: 20,
+                          }}
+                          source={
+                            actionTaskList.action_array[i].task_status == 1
+                              ? require('../assets/icons/whitetick.png')
+                              : actionTaskList.action_array[i].task_status == 0
+                              ? require('../assets/icons/whiteunlock.png')
+                              : require('../assets/icons/whitelock.png')
+                          }
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
       </View>
       <Modal
         style={{alignItems: 'center'}}

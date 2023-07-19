@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Image,
   Linking,
   Platform,
   SafeAreaView,
@@ -14,16 +15,17 @@ import ButtonComponent from '../components/buttonComponent';
 import ButtonWithIcon from '../components/ButtonWithIconComponent';
 import HorizontalRatingComponent from '../components/horizontalRatingComponent';
 import {useSelector} from 'react-redux';
+import {Modal} from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ApiConfig from '../AppNetwork/ApiConfig';
 
 const {convert} = require('html-to-text');
-function notifyMessage(msg) {
-  if (Platform.OS === 'android') {
-    ToastAndroid.show(' ' + msg, ToastAndroid.SHORT);
-  } else {
-    AlertIOS.alert('' + msg);
-  }
-}
-const HorizoltalRatingPage = () => {
+
+const HorizoltalRatingPage = ({navigation}) => {
+  const [loading, setLoading] = useState(false);
+  const [completeAction, setCompleteAction] = useState([]);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+
   const [clickedRating, setClickedRating] = useState('0');
   const apiResp = useSelector(state => state.apiRes);
 
@@ -31,8 +33,14 @@ const HorizoltalRatingPage = () => {
     wordwrap: false,
     // ...
   };
-  const nameText = convert(apiResp.apiResponse[0].name, options);
-  const descText = convert(apiResp.apiResponse[0].description, options);
+  const nameText = convert(apiResp.apiResponse.name, options);
+  const descText = convert(apiResp.apiResponse.description, options);
+  const taskStatus = apiResp.apiResponse.task_status;
+  const taskcompleteDate = apiResp.apiResponse.task_completed;
+  const actionId = apiResp.apiResponse.id;
+  const chalenjId = apiResp.apiResponse.chalenj_id;
+  const actionType = apiResp.apiResponse.type;
+
   const questiontext = convert(
     apiResp.apiResponse[0].question.question,
     options,
@@ -42,6 +50,74 @@ const HorizoltalRatingPage = () => {
   const chalenjQuestion = questiontext.trim();
 
   console.log('clickedRating-' + clickedRating);
+
+  function notifyMessage(msg) {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(' ' + msg, ToastAndroid.SHORT);
+    } else {
+      AlertIOS.alert('' + msg);
+    }
+  }
+  function callBackToMain() {
+    console.log(
+      'backparam--',
+      completeAction.chalenj_id,
+      completeAction.chalenj_priority,
+      completeAction.isPreviewchalenj,
+    );
+    setInfoModalVisible(!infoModalVisible);
+    console.log('navi---', navigation);
+    navigation.navigate('Actions', {
+      chalenjPriority: completeAction.chalenj_priority,
+      chalenjId: completeAction.chalenj_id,
+      isPreviewChalenj: completeAction.isPreviewchalenj,
+    });
+  }
+  const callActionCompleteApi = async () => {
+    var isPreview = await AsyncStorage.getItem('savePreviewType');
+    var isPreviewValue = 0;
+    {
+      isPreview == true ? (isPreviewValue = 1) : (isPreviewValue = 0);
+    }
+    console.log(
+      'MMessage-- ' + actionId,
+      chalenjId,
+      actionType,
+      isPreviewValue,
+    );
+    var token = await AsyncStorage.getItem('AuthToken');
+    setLoading(true);
+    try {
+      const response = await ApiConfig.post(
+        '/action-complete',
+        {
+          chalenj_id: chalenjId,
+          action_id: actionId,
+          type: actionType,
+          preview: isPreviewValue,
+        }, //Send Params hear
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }, //Send header config hear
+        {},
+      );
+      console.log('comp_resp--', response.data.data);
+      setCompleteAction(response.data.data);
+      setLoading(false);
+      setInfoModalVisible(true);
+    } catch (err) {
+      setLoading(false);
+      console.log(err.response);
+      if (String(err.message).includes('Network')) {
+        notifyMessage(err.message);
+      } else {
+        notifyMessage('Something went wrong.');
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <LinearGradient
@@ -136,13 +212,103 @@ const HorizoltalRatingPage = () => {
                   title="Tap To Complete"
                   showIcon={true}
                   btnIcon={require('../assets/icons/ic_right_tick.png')}
-                  onPressCallback={() => console.log('Pressed')}
+                  onPressCallback={() => callActionCompleteApi()}
                 />
               </View>
             </View>
           </View>
         </ScrollView>
       </LinearGradient>
+      {/* add modal here */}
+      <Modal
+        style={{alignItems: 'center'}}
+        animationType="slide"
+        transparent={true}
+        visible={loading}
+        onRequestClose={() => {
+          setLoading(!loading);
+        }}>
+        <View style={styles.progressViewStyle}>
+          <Image
+            source={require('../assets/icons/loader.gif')}
+            style={{width: 40, height: 40}}
+          />
+        </View>
+      </Modal>
+
+      {/* For info pop up */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={infoModalVisible}
+        onRequestClose={() => {
+          // Alert.alert('Modal has been closed.');
+          setInfoModalVisible(!infoModalVisible);
+        }}>
+        <View style={styles.modalView}>
+          <ScrollView>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                style={{width: 80, height: 80, borderRadius: 50}}
+                source={require('../assets/icons/ic_right_tick.png')}
+              />
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  color: 'black',
+                  marginTop: 15,
+                  textAlign: 'center',
+                }}>
+                {completeAction.percentage > 0 &&
+                completeAction.percentage < 100
+                  ? 'You are ' +
+                    completeAction.percentage +
+                    '% through this Action!'
+                  : 'You Completed this Action'}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: 'black',
+                  marginTop: 15,
+                  textAlign: 'center',
+                }}>
+                Would you like to go to the next Action?
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                  marginBottom: 20,
+                  marginTop: 10,
+                }}>
+                <View style={{flex: 1, marginEnd: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#e06e34"
+                    textColor="#ffffff"
+                    title="Yes"
+                    showIcon={false}
+                    onPressCallback={() => console.log('call')}
+                  />
+                </View>
+                <View style={{flex: 1, marginStart: 5}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#252635"
+                    textColor="#ffffff"
+                    title="No"
+                    showIcon={false}
+                    onPressCallback={() => callBackToMain()}
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -157,6 +323,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 14,
     color: 'white',
+  },
+  progressViewStyle: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    width: 50,
+    maxHeight: 50,
+    alignItems: 'center',
+    elevation: 5,
+    justifyContent: 'center',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    width: '90%',
+    maxHeight: '95%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 
