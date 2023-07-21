@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Platform,
+  ToastAndroid,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonComponent from '../components/buttonComponent';
@@ -35,6 +37,7 @@ const PollChalenjPage = ({navigation}) => {
   const actionId = apiResp.apiResponse.id;
   const chalenjId = apiResp.apiResponse.chalenj_id;
   const actionType = apiResp.apiResponse.type;
+  const question_type = apiResp.apiResponse.question.question_type;
   const nameText = convert(apiResp.apiResponse.name, options);
   const descText = convert(apiResp.apiResponse.description, options);
   const questiontext = convert(apiResp.apiResponse.question.question, options);
@@ -83,6 +86,13 @@ const PollChalenjPage = ({navigation}) => {
   }
   console.log('size-- ' + inputChecked.length + ' ' + myCheckBox.length);
 
+  function notifyMessage(msg) {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      Alert.alert(msg);
+    }
+  }
   function callBackToMain() {
     console.log(
       'backparam--',
@@ -108,6 +118,7 @@ const PollChalenjPage = ({navigation}) => {
       'MMMessage-- ' + actionId,
       chalenjId,
       actionType,
+      question_type,
       isPreviewValue,
       pollId,
     );
@@ -120,6 +131,7 @@ const PollChalenjPage = ({navigation}) => {
           chalenj_id: chalenjId,
           action_id: actionId,
           type: actionType,
+          question_type: question_type,
           preview: isPreviewValue,
           user_answer: pollId,
         }, //Send Params hear
@@ -383,21 +395,6 @@ const PollChalenjPage = ({navigation}) => {
                 <View></View>
               )}
             </View>
-
-            {inputChecked.length > 0 ? (
-              <View style={{marginTop: 20}}>
-                <ButtonComponent
-                  bgColor="#563410"
-                  textColor="#fff"
-                  title="Tap To Complete"
-                  showIcon={true}
-                  btnIcon={require('../assets/icons/ic_right_tick.png')}
-                  onPressCallback={() => callActionCompleteApi()}
-                />
-              </View>
-            ) : (
-              <View></View>
-            )}
           </View>
         </ScrollView>
       </LinearGradient>
@@ -448,6 +445,8 @@ const PollChalenjPage = ({navigation}) => {
                   ? 'You are ' +
                     completeAction.percentage +
                     '% through this Action!'
+                  : completeAction.chalenj_complete == true
+                  ? 'CONGRATULATIONS'
                   : 'You Completed this Action'}
               </Text>
               <Text
@@ -457,37 +456,60 @@ const PollChalenjPage = ({navigation}) => {
                   marginTop: 15,
                   textAlign: 'center',
                 }}>
-                Would you like to go to the next Action?
+                {completeAction.chalenj_complete == true
+                  ? 'You Completed \n' + completeAction.chalenj_name
+                  : 'Would you like to go to the next Action?'}
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                  marginBottom: 20,
-                  marginTop: 10,
-                }}>
-                <View style={{flex: 1, marginEnd: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#e06e34"
-                    textColor="#ffffff"
-                    title="Yes"
-                    showIcon={false}
-                    onPressCallback={() => console.log('call')}
-                  />
+
+              {completeAction.chalenj_complete == true ? (
+                <View
+                  style={{
+                    flex: 1,
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{flex: 1}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Ok"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-                <View style={{flex: 1, marginStart: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#252635"
-                    textColor="#ffffff"
-                    title="No"
-                    showIcon={false}
-                    onPressCallback={() => callBackToMain()}
-                  />
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flex: 1,
+                    justifyContent: 'space-between',
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{flex: 1, marginEnd: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Yes"
+                      showIcon={false}
+                      onPressCallback={() => console.log('call')}
+                    />
+                  </View>
+                  <View style={{flex: 1, marginStart: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#252635"
+                      textColor="#ffffff"
+                      title="No"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
           </ScrollView>
         </View>

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   ToastAndroid,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,17 +19,17 @@ import {useSelector} from 'react-redux';
 import {Modal} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
-
+import moment from 'moment';
 const {convert} = require('html-to-text');
 
 const HorizoltalRatingPage = ({navigation}) => {
+  moment.locale();
   const [loading, setLoading] = useState(false);
   const [completeAction, setCompleteAction] = useState([]);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
 
-  const [clickedRating, setClickedRating] = useState('0');
   const apiResp = useSelector(state => state.apiRes);
-
+  const [showMessage, setShowMessage] = useState(false);
   const options = {
     wordwrap: false,
     // ...
@@ -40,16 +41,15 @@ const HorizoltalRatingPage = ({navigation}) => {
   const actionId = apiResp.apiResponse.id;
   const chalenjId = apiResp.apiResponse.chalenj_id;
   const actionType = apiResp.apiResponse.type;
-
-  const questiontext = convert(
-    apiResp.apiResponse[0].question.question,
-    options,
-  );
+  const question_type = apiResp.apiResponse.question.question_type;
+  const ratingAnswer = apiResp.apiResponse.question.horizontal_rating;
+  const questiontext = convert(apiResp.apiResponse.question.question, options);
   const name = nameText.trim();
   const description = descText.trim();
   const chalenjQuestion = questiontext.trim();
-
-  console.log('clickedRating-' + clickedRating);
+  const [clickedRating, setClickedRating] = useState(
+    taskStatus == 1 ? ratingAnswer : 0,
+  );
 
   function notifyMessage(msg) {
     if (Platform.OS === 'android') {
@@ -73,6 +73,17 @@ const HorizoltalRatingPage = ({navigation}) => {
       isPreviewChalenj: completeAction.isPreviewchalenj,
     });
   }
+
+  function check() {
+    console.log(
+      'ratingParam-- ' + actionId,
+      chalenjId,
+      actionType,
+      question_type,
+      clickedRating,
+    );
+  }
+
   const callActionCompleteApi = async () => {
     var isPreview = await AsyncStorage.getItem('savePreviewType');
     var isPreviewValue = 0;
@@ -80,10 +91,12 @@ const HorizoltalRatingPage = ({navigation}) => {
       isPreview == true ? (isPreviewValue = 1) : (isPreviewValue = 0);
     }
     console.log(
-      'MMessage-- ' + actionId,
+      'ratingParam-- ' + actionId,
       chalenjId,
       actionType,
+      question_type,
       isPreviewValue,
+      clickedRating,
     );
     var token = await AsyncStorage.getItem('AuthToken');
     setLoading(true);
@@ -94,7 +107,9 @@ const HorizoltalRatingPage = ({navigation}) => {
           chalenj_id: chalenjId,
           action_id: actionId,
           type: actionType,
+          question_type: question_type,
           preview: isPreviewValue,
+          rate: clickedRating,
         }, //Send Params hear
         {
           headers: {
@@ -166,59 +181,118 @@ const HorizoltalRatingPage = ({navigation}) => {
                 <HorizontalRatingComponent
                   titleText="1"
                   onPressCallback={() => {
-                    setClickedRating(1);
+                    taskStatus == 1 ? null : setClickedRating(1);
                   }}
-                  bgColor={clickedRating == '1' ? '#e06e34' : '#fff'}
-                  btnTextColor={clickedRating == '1' ? '#fff' : '#000'}
+                  bgColor={clickedRating == 1 ? '#e06e34' : '#fff'}
+                  btnTextColor={clickedRating == 1 ? '#fff' : '#000'}
                 />
                 <HorizontalRatingComponent
                   titleText="2"
                   onPressCallback={() => {
-                    setClickedRating('2');
+                    taskStatus == 1 ? null : setClickedRating(2);
                   }}
-                  bgColor={clickedRating == '2' ? '#e06e34' : '#fff'}
-                  btnTextColor={clickedRating == '2' ? '#fff' : '#000'}
+                  bgColor={clickedRating == 2 ? '#e06e34' : '#fff'}
+                  btnTextColor={clickedRating == 2 ? '#fff' : '#000'}
                 />
                 <HorizontalRatingComponent
                   titleText="3"
                   onPressCallback={() => {
-                    setClickedRating('3');
+                    taskStatus == 1 ? null : setClickedRating(3);
                   }}
-                  bgColor={clickedRating == '3' ? '#e06e34' : '#fff'}
-                  btnTextColor={clickedRating == '3' ? '#fff' : '#000'}
+                  bgColor={clickedRating == 3 ? '#e06e34' : '#fff'}
+                  btnTextColor={clickedRating == 3 ? '#fff' : '#000'}
                 />
                 <HorizontalRatingComponent
                   titleText="4"
                   onPressCallback={() => {
-                    setClickedRating('4');
+                    taskStatus == 1 ? null : setClickedRating(4);
                   }}
-                  bgColor={clickedRating == '4' ? '#e06e34' : '#fff'}
-                  btnTextColor={clickedRating == '4' ? '#fff' : '#000'}
+                  bgColor={clickedRating == 4 ? '#e06e34' : '#fff'}
+                  btnTextColor={clickedRating == 4 ? '#fff' : '#000'}
                 />
                 <HorizontalRatingComponent
                   titleText="5"
                   onPressCallback={() => {
-                    setClickedRating('5');
+                    taskStatus == 1 ? null : setClickedRating(5);
                   }}
-                  bgColor={clickedRating == '5' ? '#e06e34' : '#fff'}
-                  btnTextColor={clickedRating == '5' ? '#fff' : '#000'}
+                  bgColor={clickedRating == 5 ? '#e06e34' : '#fff'}
+                  btnTextColor={clickedRating == 5 ? '#fff' : '#000'}
                 />
               </View>
 
               <View style={{marginTop: 20}}>
-                <ButtonComponent
-                  bgColor="#563410"
-                  textColor="#fff"
-                  title="Tap To Complete"
-                  showIcon={true}
-                  btnIcon={require('../assets/icons/ic_right_tick.png')}
-                  onPressCallback={() => callActionCompleteApi()}
-                />
+                {taskStatus == 1 ? (
+                  <View>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                      <View style={{flex: 0.7, marginEnd: 5}}>
+                        <ButtonComponent
+                          bgColor="#bebebe"
+                          textColor="#000"
+                          title="Action Completed"
+                          showIcon={false}
+                          btnIcon={require('../assets/icons/ic_right_tick.png')}
+                          onPressCallback={() => console.log('completed')}
+                        />
+                      </View>
+                      <View style={{flex: 0.3, marginTop: 15, marginStart: 5}}>
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: '#573310',
+                            alignItems: 'center',
+                            padding: 10,
+                            borderRadius: 50,
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: 'white',
+                          }}
+                          onPress={() => setShowMessage(!showMessage)}>
+                          <Image
+                            style={{height: 20, width: 20}}
+                            source={require('../assets/icons/info_details.png')}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                    {showMessage ? (
+                      <View
+                        style={{
+                          height: 40,
+                          flex: 1,
+                          backgroundColor: '#e06e34',
+                          borderRadius: 10,
+                          marginTop: 15,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                        <Text style={{fontSize: 12, fontWeight: 'bold'}}>
+                          Action completed on:{' '}
+                          {moment(taskcompleteDate).format(
+                            'MM-DD-YYYY hh:mm a',
+                          )}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                ) : clickedRating > 0 ? (
+                  <View style={{marginTop: 20}}>
+                    <ButtonComponent
+                      bgColor="#563410"
+                      textColor="#fff"
+                      title="Tap To Complete"
+                      showIcon={true}
+                      btnIcon={require('../assets/icons/ic_right_tick.png')}
+                      onPressCallback={() => callActionCompleteApi()}
+                    />
+                  </View>
+                ) : (
+                  <View></View>
+                )}
               </View>
             </View>
           </View>
         </ScrollView>
       </LinearGradient>
+
       {/* add modal here */}
       <Modal
         style={{alignItems: 'center'}}
@@ -265,6 +339,8 @@ const HorizoltalRatingPage = ({navigation}) => {
                   ? 'You are ' +
                     completeAction.percentage +
                     '% through this Action!'
+                  : completeAction.chalenj_complete == true
+                  ? 'CONGRATULATIONS'
                   : 'You Completed this Action'}
               </Text>
               <Text
@@ -274,37 +350,60 @@ const HorizoltalRatingPage = ({navigation}) => {
                   marginTop: 15,
                   textAlign: 'center',
                 }}>
-                Would you like to go to the next Action?
+                {completeAction.chalenj_complete == true
+                  ? 'You Completed \n' + completeAction.chalenj_name
+                  : 'Would you like to go to the next Action?'}
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                  marginBottom: 20,
-                  marginTop: 10,
-                }}>
-                <View style={{flex: 1, marginEnd: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#e06e34"
-                    textColor="#ffffff"
-                    title="Yes"
-                    showIcon={false}
-                    onPressCallback={() => console.log('call')}
-                  />
+
+              {completeAction.chalenj_complete == true ? (
+                <View
+                  style={{
+                    flex: 1,
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{flex: 1}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Ok"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-                <View style={{flex: 1, marginStart: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#252635"
-                    textColor="#ffffff"
-                    title="No"
-                    showIcon={false}
-                    onPressCallback={() => callBackToMain()}
-                  />
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flex: 1,
+                    justifyContent: 'space-between',
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{flex: 1, marginEnd: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Yes"
+                      showIcon={false}
+                      onPressCallback={() => console.log('call')}
+                    />
+                  </View>
+                  <View style={{flex: 1, marginStart: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#252635"
+                      textColor="#ffffff"
+                      title="No"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
           </ScrollView>
         </View>

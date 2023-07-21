@@ -129,7 +129,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     {
       isPreviewChalenj == true ? (previewChalenj = 1) : (previewChalenj = 0);
     }
-    console.log('detailsparm--', openchalenjId, previewChalenj, actionId);
+    console.log('Detailsparam-', openchalenjId, previewChalenj, actionId);
     setAuthToken(token);
     setLoading(true);
     try {
@@ -247,7 +247,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
         {callApi == true &&
         actionTaskList.type == 10 &&
         actionTaskList.question.question_type == 1 ? (
-          <QuizChalengPage />
+          <QuizChalengPage navigation={navigation} />
         ) : callApi == true &&
           actionTaskList.type == 10 &&
           actionTaskList.question.question_type == 2 ? (
@@ -259,12 +259,12 @@ const ChalenjActionPage = ({route, navigation, props}) => {
         ) : callApi == true &&
           actionTaskList.type == 10 &&
           actionTaskList.question.question_type == 4 ? (
-          <RatingStarChalenj />
+          <RatingStarChalenj navigation={navigation} />
         ) : callApi == true &&
           actionTaskList.type == 10 &&
           actionTaskList.question.question_type == 5 &&
           actionTaskList.question.choice_feature == 0 ? (
-          <SingleChoiceVerticalPage />
+          <SingleChoiceVerticalPage navigation={navigation} />
         ) : callApi == true &&
           actionTaskList.type == 10 &&
           actionTaskList.question.question_type == 5 &&
