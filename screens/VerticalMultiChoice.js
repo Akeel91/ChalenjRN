@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
 import {Modal} from 'react-native-paper';
 import moment from 'moment';
-const MultiChoiceVerticalPage = () => {
+const MultiChoiceVerticalPage = ({navigation}) => {
   moment.locale();
   const [myCheckBox, setMyCheckBoxChecked] = useState([]);
   const [getSelectedAnswerId, setGetSelectedAnswerId] = useState([]);

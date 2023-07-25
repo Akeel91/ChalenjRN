@@ -1,11 +1,14 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -21,7 +24,6 @@ import {Modal} from 'react-native-paper';
 const CompleteAction = ({navigation}) => {
   const [showMessage, setShowMessage] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [info2ModalVisible, setInfo2ModalVisible] = useState(false);
 
   const apiResp = useSelector(state => state.apiRes);
   const options = {
@@ -37,9 +39,16 @@ const CompleteAction = ({navigation}) => {
   const actionType = apiResp.apiResponse.type;
   const name = nameText.trim();
   const description = descText.trim();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [completeAction, setCompleteAction] = useState([]);
 
+  function notifyMessage(msg) {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      Alert.alert(msg);
+    }
+  }
   function callBackToMain() {
     console.log(
       'backparam--',
@@ -55,7 +64,7 @@ const CompleteAction = ({navigation}) => {
     });
   }
   const callActionCompleteApi = async () => {
-    console.log('Message-- ' + actionId, chalenjId, actionType);
+    console.log('completAct-- ' + actionId, chalenjId, actionType);
     var isPreview = await AsyncStorage.getItem('savePreviewType');
     var isPreviewValue = 0;
     {
@@ -83,6 +92,7 @@ const CompleteAction = ({navigation}) => {
       console.log('comp_resp--', response.data.data);
       setCompleteAction(response.data.data);
       setLoading(false);
+      setInfoModalVisible(true);
     } catch (err) {
       setLoading(false);
       console.log(err.response);
@@ -203,6 +213,7 @@ const CompleteAction = ({navigation}) => {
 
       {/* For info pop up */}
       <Modal
+        style={{marginTop: -50}}
         animationType="slide"
         transparent={true}
         visible={infoModalVisible}
@@ -230,7 +241,9 @@ const CompleteAction = ({navigation}) => {
                   ? 'You are ' +
                     completeAction.percentage +
                     '% through this Action!'
-                  : null}
+                  : completeAction.chalenj_complete == true
+                  ? 'CONGRATULATIONS'
+                  : 'You Completed this Action'}
               </Text>
               <Text
                 style={{
@@ -239,37 +252,59 @@ const CompleteAction = ({navigation}) => {
                   marginTop: 15,
                   textAlign: 'center',
                 }}>
-                Would you like to go to the next Action?
+                {completeAction.chalenj_complete == true
+                  ? 'You Completed \n' + completeAction.chalenj_name
+                  : 'Would you like to go to the next Action?'}
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                  marginBottom: 20,
-                  marginTop: 10,
-                }}>
-                <View style={{flex: 1, marginEnd: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#e06e34"
-                    textColor="#ffffff"
-                    title="Yes"
-                    showIcon={false}
-                    onPressCallback={() => console.log('call')}
-                  />
+
+              {completeAction.chalenj_complete == true ? (
+                <View
+                  style={{
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Ok"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-                <View style={{flex: 1, marginStart: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#252635"
-                    textColor="#ffffff"
-                    title="No"
-                    showIcon={false}
-                    onPressCallback={() => callBackToMain()}
-                  />
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flex: 1,
+                    justifyContent: 'space-between',
+                    marginBottom: 20,
+                    marginTop: 10,
+                  }}>
+                  <View style={{flex: 1, marginEnd: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#e06e34"
+                      textColor="#ffffff"
+                      title="Yes"
+                      showIcon={false}
+                      onPressCallback={() => console.log('call')}
+                    />
+                  </View>
+                  <View style={{flex: 1, marginStart: 5}}>
+                    <ButtonComponent
+                      borderColor="#fff"
+                      bgColor="#252635"
+                      textColor="#ffffff"
+                      title="No"
+                      showIcon={false}
+                      onPressCallback={() => callBackToMain()}
+                    />
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
           </ScrollView>
         </View>
@@ -298,6 +333,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 14,
     color: 'white',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    width: '90%',
+    maxHeight: '95%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 

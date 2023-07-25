@@ -61,6 +61,8 @@ const ChalenjPage = props => {
   const [activeButton, setActiveButton] = useState('active');
   const [chalenjDetails, setChalenjDetails] = useState([]);
   const [isPreviewchalenj, setIsPreviewchalenj] = useState(false);
+  const [actionFolderType, setActionFolderType] = useState('active');
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
 
   const flatListRef = React.useRef();
   const flatListCompRef = React.useRef();
@@ -455,7 +457,7 @@ const ChalenjPage = props => {
     }
     AsyncStorage.setItem('savePreviewType', previewChalenj);
     setIsPreviewchalenj(previewChalenj);
-    console.log('refreshchalenj--', chalenjId, type, previewChalenj);
+    console.log('refreschalenj--', chalenjId, type, previewChalenj);
     var token = await AsyncStorage.getItem('AuthToken');
     setAuthToken(token);
     setLoading(true);
@@ -487,6 +489,10 @@ const ChalenjPage = props => {
     }
   };
 
+  function callbackMenu() {
+    setInfoModalVisible(false);
+    setActionViewVisible(false);
+  }
   const isFocused = useIsFocused();
   useEffect(() => {
     console.log('called');
@@ -688,13 +694,17 @@ const ChalenjPage = props => {
                     textColor="#ffffff"
                     title="View Action"
                     showIcon={false}
-                    onPressCallback={() =>
-                      props.navigation.navigate('Actions', {
-                        chalenjPriority: chalenjDetails.chalenj_priority,
-                        chalenjId: chalenjDetails.id,
-                        isPreviewChalenj: isPreviewchalenj,
-                      })
-                    }
+                    onPressCallback={() => {
+                      actionFolderType == 'active'
+                        ? props.navigation.navigate('Actions', {
+                            chalenjPriority: chalenjDetails.chalenj_priority,
+                            chalenjId: chalenjDetails.id,
+                            isPreviewChalenj: isPreviewchalenj,
+                          })
+                        : actionFolderType == 'completed'
+                        ? setInfoModalVisible(true)
+                        : null;
+                    }}
                   />
                 </View>
               </View>
@@ -799,8 +809,8 @@ const ChalenjPage = props => {
                         // manage view for view actions
                         setActionViewVisible(true);
                         //set preview type in pref
-
                         callChalenjDetailsApi(item.id, item.display_type);
+                        setActionFolderType('active');
                       }}
                       onPreviewClick={() => {
                         // manage view for view actions
@@ -849,6 +859,8 @@ const ChalenjPage = props => {
                         console.log('name - ' + item.name);
                         // manage view for view actions
                         setActionViewVisible(true);
+                        callChalenjDetailsApi(item.id, item.display_type);
+                        setActionFolderType('completed');
                       }}
                       onPreviewClick={() => {
                         // manage view for view actions
@@ -1218,87 +1230,6 @@ const ChalenjPage = props => {
               </View>
             </View>
           </BottomSheet>
-
-          {/* 
-          
-          <BottomSheet
-            wrapperStyle={{backgroundColor: '#252635'}}
-            animationDuration={50}
-            sliderMinHeight={0}
-            isOpen={false}
-            onClose={() => console.log('close')}
-            ref={ref => (panelRefDelete.current = ref)}>
-            <View>
-              <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold'}}>
-                Select Folder to delete
-              </Text>
-              <View
-                style={{
-                  marginTop: 20,
-                  borderWidth: 1,
-                  borderColor: 'white',
-                  borderRadius: 50,
-                  paddingHorizontal: 15,
-                  paddingVertical: 5,
-                }}>
-                <Dropdown
-                  style={[
-                    styles.dropdown,
-                    isFocus && {borderColor: 'white', color: 'black'},
-                  ]}
-                  containerStyle={{backgroundColor: 'black'}}
-                  activeColor={{backgroundColor: 'red'}}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={data}
-                  search
-                  maxHeight={300}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={!isFocus ? 'Select item' : '...'}
-                  searchPlaceholder="Search..."
-                  value={value}
-                  onFocus={() => setIsFocus(true)}
-                  onBlur={() => setIsFocus(false)}
-                  onChange={item => {
-                    setValue(item.value);
-                    setIsFocus(false);
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                  marginBottom: 20,
-                  marginTop: 5,
-                }}>
-                <View style={{flex: 1, marginEnd: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#252635"
-                    textColor="#ffffff"
-                    title="Cancle"
-                    showIcon={false}
-                    onPressCallback={() => panelRefDelete.current.togglePanel()}
-                  />
-                </View>
-                <View style={{flex: 1, marginStart: 5}}>
-                  <ButtonComponent
-                    borderColor="#fff"
-                    bgColor="#e06e34"
-                    textColor="#ffffff"
-                    title="Delete"
-                    showIcon={false}
-                    onPressCallback={() => console.log('Pressed')}
-                  />
-                </View>
-              </View>
-            </View>
-          </BottomSheet> */}
         </SafeAreaView>
       )}
 
@@ -1316,6 +1247,67 @@ const ChalenjPage = props => {
             source={require('../assets/icons/loader.gif')}
             style={{width: 40, height: 40}}
           />
+        </View>
+      </Modal>
+
+      {/* For info pop up */}
+      <Modal
+        style={{marginTop: -50}}
+        animationType="slide"
+        transparent={true}
+        visible={infoModalVisible}
+        onRequestClose={() => {
+          // Alert.alert('Modal has been closed.');
+          setInfoModalVisible(!infoModalVisible);
+        }}>
+        <View style={styles.modalView}>
+          <ScrollView>
+            <View style={{alignItems: 'center'}}>
+              <Image
+                style={{width: 80, height: 80, borderRadius: 50}}
+                source={require('../assets/icons/ic_right_tick.png')}
+              />
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  color: 'black',
+                  marginTop: 15,
+                  textAlign: 'center',
+                }}>
+                CONGRATULATIONS
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: 'black',
+                  marginTop: 15,
+                  textAlign: 'center',
+                }}>
+                {'You have successfully completed' + '\n' + chalenjDetails.name}
+              </Text>
+              <View
+                style={{
+                  marginBottom: 20,
+                  marginTop: 10,
+                  flexDirection: 'row',
+                }}>
+                <View style={{flex: 1}}>
+                  <ButtonComponent
+                    borderColor="#fff"
+                    bgColor="#e06e34"
+                    textColor="#ffffff"
+                    title="Ok"
+                    showIcon={false}
+                    onPressCallback={() =>
+                      // setInfoModalVisible(false),
+                      callbackMenu()
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>
@@ -1432,6 +1424,23 @@ const styles = StyleSheet.create({
     margin: 10,
     color: '#ffffff',
     backgroundColor: 'transparent',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    width: '90%',
+    maxHeight: '95%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 export default ChalenjPage;

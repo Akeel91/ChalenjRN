@@ -269,27 +269,27 @@ const ChalenjActionPage = ({route, navigation, props}) => {
           actionTaskList.type == 10 &&
           actionTaskList.question.question_type == 5 &&
           actionTaskList.question.choice_feature == 2 ? (
-          <MultiChoiceVerticalPage />
+          <MultiChoiceVerticalPage navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 1 ? (
-          <VideoChalenjPage />
+          <VideoChalenjPage navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 2 ? (
           <AddNoteChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 3 ? (
-          <UploadDocChalenj />
+          <UploadDocChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 4 ? (
-          <OpenPDFChalenj />
+          <OpenPDFChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 5 ? (
-          <UploadImageChalenj />
+          <UploadImageChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 6 ? (
-          <OpenLinkChalenj />
+          <OpenLinkChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 7 ? (
           <SendEmailChalenj /> //remaining to implement also 8,9
         ) : callApi == true && actionTaskList.type == 8 ? (
           <CompleteAction navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 11 ? (
-          <FormChalenjPage />
+          <FormChalenjPage navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 12 ? (
-          <OpenCertificatePage />
+          <OpenCertificatePage navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 13 ? (
           <QRScanChalenj />
         ) : null}
