@@ -34,7 +34,7 @@ const OpenCertificatePage = ({navigation}) => {
   };
   const nameText = convert(apiResp.apiResponse.name, options);
   const descText = convert(apiResp.apiResponse.description, options);
-  const certificateUrl = apiResp.apiResponse.certificate_data.url;
+  const certificateUrl = apiResp.apiResponse.certificate_data.download_url;
   const name = nameText.trim();
   const description = descText.trim();
   const [showMessage, setShowMessage] = useState(false);
@@ -70,11 +70,11 @@ const OpenCertificatePage = ({navigation}) => {
     });
   }
   function check() {
-    console.log('certificateParam--', chalenjId, actionId);
+    console.log('certificate_Param--', chalenjId, actionId);
   }
 
   const OpenCertificate = async () => {
-    console.log('ts_content---', certificateUrl);
+    console.log('certificateUrl---', certificateUrl);
     await Linking.openURL(certificateUrl); // It will open the URL on browser.
 
     // // Put your url here -----

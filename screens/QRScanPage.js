@@ -6,15 +6,25 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import {RNCamera} from 'react-native-camera';
+import {useDispatch} from 'react-redux';
+// var backnavigation = '';
 
-function onSuccess(e) {
-  Linking.openURL(e.data).catch(err => console.error('An error occured', err));
-}
+const callBackToMain = () => {
+  // console.log('navigation---', navigation);
+};
 
 const QRScanPage = ({navigation}) => {
+  const dispatch = useDispatch();
+  function onSuccess(e) {
+    console.log('scandata--', e.data);
+    dispatch({type: 'qrScanResponse', payload: e.data});
+    console.log('navigation---', navigation);
+  }
+
   return (
     <QRCodeScanner
       onRead={onSuccess}

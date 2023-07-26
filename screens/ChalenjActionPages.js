@@ -120,6 +120,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
 
   useEffect(() => {
     callActionTaskList(actionId);
+    console.log('callingqr--', 'yes');
   }, []);
 
   //This Api is for action details by id
@@ -291,7 +292,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
         ) : callApi == true && actionTaskList.type == 12 ? (
           <OpenCertificatePage navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 13 ? (
-          <QRScanChalenj />
+          <QRScanChalenj navigation={navigation} />
         ) : null}
 
         {showSubMenu == true && callApi == true ? (
