@@ -29,19 +29,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
 import {Modal} from 'react-native-paper';
 import {useIsFocused} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import CertificatePage from './certificatePage';
 import CompleteAction from './CompleteActionPage';
 
 const ChalenjActionPage = ({route, navigation, props}) => {
+  // const nextCallStatus = useSelector(state => state.callNextAction);
   const [authToken, setAuthToken] = useState('');
   const [actionTaskList, setActionTaskList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [myCheckBox, setMyCheckBoxChecked] = useState([]);
   const [showFisrtSelected, setShowFisrtSelected] = useState(true);
-
   const dispatch = useDispatch();
+
+  const yesClickedPopup = useSelector(state => state.callnextaction);
+  const clickedYes = yesClickedPopup.callNext;
+  console.log('clickedYes1--', clickedYes);
+
   const {
     actionId,
     chalenjId,
@@ -123,8 +128,11 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     console.log('callingqr--', 'yes');
   }, []);
 
+  console.log('clickedY--0', clickedYes);
+
   //This Api is for action details by id
   const callChalenjActionListApi = async actionId => {
+    dispatch({type: 'clickedYes', payload: false});
     var token = await AsyncStorage.getItem('AuthToken');
     var previewChalenj = 0;
     {
@@ -172,6 +180,26 @@ const ChalenjActionPage = ({route, navigation, props}) => {
     }
   };
 
+  function callNextMainAction() {
+    setCallApi(false);
+    console.log('nextId--', actionTaskList.advance_arrow.next_id);
+    setPageCount(pageCount + 1);
+    callChalenjActionListApi(actionTaskList.advance_arrow.next_id);
+  }
+  function callPreviousMainAction() {
+    setCallApi(false);
+    console.log('nextId--', actionTaskList.advance_arrow.previous_id);
+    setPageCount(pageCount - 1);
+    callChalenjActionListApi(actionTaskList.advance_arrow.previous_id);
+  }
+  console.log('clickedY--1', clickedYes);
+
+  {
+    clickedYes == true ? callNextMainAction() : null;
+  }
+
+  // console.log('callnextactionbtn--', nextCallStatus);
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#61626c'}}>
       <View style={{flex: 1}}>
@@ -208,7 +236,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
           <TouchableOpacity
             style={styles.ImageStyle}
             onPress={() => {
-              pageCount > 1 ? setPageCount(pageCount - 1) : setPageCount(1);
+              pageCount > 1 ? callPreviousMainAction() : setPageCount(1);
             }}>
             <Image
               style={{alignSelf: 'center', width: 30, height: 30}}
@@ -225,7 +253,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
             onPress={() => {
               callApi == true && actionTaskList.advance_arrow.next_id != ''
                 ? pageCount < numberOfAction
-                  ? setPageCount(pageCount + 1)
+                  ? callNextMainAction()
                   : setPageCount(numberOfAction)
                 : null;
             }}>
@@ -284,7 +312,7 @@ const ChalenjActionPage = ({route, navigation, props}) => {
         ) : callApi == true && actionTaskList.type == 6 ? (
           <OpenLinkChalenj navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 7 ? (
-          <SendEmailChalenj /> //remaining to implement also 8,9
+          <SendEmailChalenj navigation={navigation} /> //remaining to implement also 8,9
         ) : callApi == true && actionTaskList.type == 8 ? (
           <CompleteAction navigation={navigation} />
         ) : callApi == true && actionTaskList.type == 11 ? (

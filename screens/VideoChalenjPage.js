@@ -175,7 +175,7 @@ const VideoChalenjPage = ({navigation}) => {
               </View>
             </View>
             <View style={{marginTop: 20}}>
-              {taskStatus == 1 ? (
+              {taskStatus == 0 ? (
                 <View>
                   <View style={{flex: 1, flexDirection: 'row'}}>
                     <View style={{flex: 0.7, marginEnd: 5}}>
@@ -311,8 +311,10 @@ const VideoChalenjPage = ({navigation}) => {
                   style={{
                     marginBottom: 20,
                     marginTop: 10,
+                    flexDirection: 'row',
+                    flex: 1,
                   }}>
-                  <View style={{}}>
+                  <View style={{flex: 1}}>
                     <ButtonComponent
                       borderColor="#fff"
                       bgColor="#e06e34"

@@ -21,28 +21,46 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
 import {Modal} from 'react-native-paper';
 import ButtonComponent from '../components/buttonComponent';
+import {useDispatch} from 'react-redux';
 
 const OpenLinkChalenj = ({navigation}) => {
+  const [loading, setLoading] = useState(false);
+  const [completeAction, setCompleteAction] = useState([]);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
+  const dispatch = useDispatch();
+  const yesClickedPopup = useSelector(state => state.callnextaction);
+  const clickedYes = yesClickedPopup.callNext;
+  console.log('fad--', clickedYes);
   const apiResp = useSelector(state => state.apiRes);
   const options = {
     wordwrap: false,
     // ...
   };
-  const nameText = convert(apiResp.apiResponse.name, options);
-  const descText = convert(apiResp.apiResponse.description, options);
-  const name = nameText.trim();
-  const description = descText.trim();
-  const [loading, setLoading] = useState(false);
-  const [completeAction, setCompleteAction] = useState([]);
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const taskStatus = apiResp.apiResponse.task_status;
-  const ts_content = apiResp.apiResponse.content;
-  const taskcompleteDate = apiResp.apiResponse.task_completed;
-  const actionId = apiResp.apiResponse.id;
-  const chalenjId = apiResp.apiResponse.chalenj_id;
-  const actionType = apiResp.apiResponse.type;
-  const [showMessage, setShowMessage] = useState(false);
 
+  var name;
+  var description;
+  var taskStatus;
+  var ts_content;
+  var taskcompleteDate;
+  var actionId;
+  var chalenjId;
+  var actionType;
+  function constItem() {
+    const nameText = convert(apiResp.apiResponse.name, options);
+    const descText = convert(apiResp.apiResponse.description, options);
+    name = nameText.trim();
+    description = descText.trim();
+    taskStatus = apiResp.apiResponse.task_status;
+    ts_content = apiResp.apiResponse.content;
+    taskcompleteDate = apiResp.apiResponse.task_completed;
+    actionId = apiResp.apiResponse.id;
+    chalenjId = apiResp.apiResponse.chalenj_id;
+    actionType = apiResp.apiResponse.type;
+  }
+  {
+    clickedYes == true ? null : constItem();
+  }
   function notifyMessage(msg) {
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
@@ -158,7 +176,7 @@ const OpenLinkChalenj = ({navigation}) => {
                 btnTitleColor="#fff"
                 onPressCallback={() => {
                   {
-                    taskStatus == 1 ? null : openURI();
+                    taskStatus == 0 ? null : openURI();
                   }
                 }}
               />
@@ -318,7 +336,9 @@ const OpenLinkChalenj = ({navigation}) => {
                       textColor="#ffffff"
                       title="Yes"
                       showIcon={false}
-                      onPressCallback={() => console.log('call')}
+                      onPressCallback={() =>
+                        dispatch({type: 'clickedYes', payload: true})
+                      }
                     />
                   </View>
                   <View style={{flex: 1, marginStart: 5}}>

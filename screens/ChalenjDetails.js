@@ -16,7 +16,7 @@ import HeaderComponent from '../components/HeaderComponent';
 import Inputcomponent from '../components/InputTypeComponent';
 import ChalenjItem from '../components/rowChalenjItem';
 import {useIsFocused} from '@react-navigation/native';
-
+const {convert} = require('html-to-text');
 import {Modal} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiConfig from '../AppNetwork/ApiConfig';
@@ -25,6 +25,10 @@ import ButtonComponent from '../components/buttonComponent';
 import APPLICATION_CONSTANTS from '../constant/constantsFile';
 
 const ChalenjDetailsPage = ({route, navigation, props}) => {
+  const options = {
+    wordwrap: false,
+    // ...
+  };
   const [clickStatas, setClickStatas] = useState(false);
   const [searchItem, setSearchItem] = useState('');
   const [searchClick, setSearchClick] = useState(false);
@@ -394,16 +398,27 @@ const ChalenjDetailsPage = ({route, navigation, props}) => {
                     taskDay={item.task_day}
                     instStep={item.number}
                     type="dateSpef"
-                    title={'' + item.name}
+                    title={convert(item.name, options)}
                     imageTop={
-                      item.action_lock == false
+                      item.action_completed == true
+                        ? require('../assets/icons/correct.png')
+                        : item.action_lock == false
                         ? require('../assets/icons/open_lock.png')
                         : require('../assets/icons/padlock.png')
                     }
                     bgColor={item.action_lock == false ? '#e06e34' : '#573310'}
-                    onPressCallback={() =>
-                      console.log('listitemId--', actionListData[index].id)
-                    }
+                    onPressCallback={() => {
+                      item.action_lock == false
+                        ? navigation.navigate('ChalenjActionPage', {
+                            actionId: item.id,
+                            chalenjId: chalenjId,
+                            isPreviewChalenj: isPreviewChalenj,
+                            subAction: item.children_status,
+                            numberOfAction: dateSpefActionListData.length,
+                            actionNum: index + 1,
+                          })
+                        : setInfoModalVisible(true);
+                    }}
                   />
                 </View>
               );

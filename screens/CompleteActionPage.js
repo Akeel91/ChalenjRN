@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import ButtonComponent from '../components/buttonComponent';
 const {convert} = require('html-to-text');
 import moment from 'moment';
@@ -22,6 +22,7 @@ import ApiConfig from '../AppNetwork/ApiConfig';
 import {Modal} from 'react-native-paper';
 
 const CompleteAction = ({navigation}) => {
+  const dispatch = useDispatch();
   const [showMessage, setShowMessage] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
 
@@ -129,7 +130,7 @@ const CompleteAction = ({navigation}) => {
               {description}
             </Text>
             <View style={{marginTop: 20}}>
-              {taskStatus == 1 ? (
+              {taskStatus == 0 ? (
                 <View>
                   <View style={{flex: 1, flexDirection: 'row'}}>
                     <View style={{flex: 0.7, marginEnd: 5}}>
@@ -290,7 +291,10 @@ const CompleteAction = ({navigation}) => {
                       textColor="#ffffff"
                       title="Yes"
                       showIcon={false}
-                      onPressCallback={() => console.log('call')}
+                      onPressCallback={() =>
+                        //add this for next action
+                        dispatch({type: 'clickedYes', payload: true})
+                      }
                     />
                   </View>
                   <View style={{flex: 1, marginStart: 5}}>
